@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dragon Fury - Advanced Edition</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div id="game-container">
@@ -193,77 +193,77 @@
     </div>
 
     <!-- 🔧 NOVO: helpers de polígonos (usados por inimigos e bosses) -->
-    <script src="geo-utils.js"></script>
+    <script src="js/core/geo-utils.js"></script>
     
     <!-- 🔧 NOVO: sistema de áudio sintetizado (Web Audio API) -->
-    <script src="audio-system.js"></script>
+    <script src="js/systems/audio-system.js"></script>
     
     <!-- Scripts Originais -->
-    <script src="data.js"></script>
-    <script src="player.js"></script>
+    <script src="js/core/data.js"></script>
+    <script src="js/core/player.js"></script>
     
     <!-- ✨ ENHANCED: Sistema de Melhorias Visuais -->
-    <script src="visual-enhancements.js"></script>
+    <script src="js/effects/visual-enhancements.js"></script>
     
     <!-- ✨ NOVO: Sistemas de Efeitos Visuais Avançados -->
-    <script src="coin-effects.js"></script>
-    <script src="powerup-effects.js"></script>
+    <script src="js/effects/coin-effects.js"></script>
+    <script src="js/effects/powerup-effects.js"></script>
     
-    <script src="entities.js"></script>
-    <script src="achievements.js"></script>
-    <script src="upgrades.js"></script>
+    <script src="js/core/entities.js"></script>
+    <script src="js/systems/achievements.js"></script>
+    <script src="js/systems/upgrades.js"></script>
     
     <!-- ✨ NOVO: Sistema de Rank -->
-    <script src="rank-system.js"></script>
+    <script src="js/systems/rank-system.js"></script>
     
     <!-- 🔧 CORRIGIDO: Usar versões corrigidas de UI e Game -->
-    <script src="ui.js"></script>
-    <script src="phase-loading.js"></script>
-    <script src="game.js"></script>
+    <script src="ui/ui.js"></script>
+    <script src="phases/phase-loading.js"></script>
+    <script src="js/core/game.js"></script>
     
     <!-- Novos Sistemas -->
-    <script src="dragon-escorts.js"></script>
+    <script src="js/systems/dragon-escorts.js"></script>
     
     <!-- ✨ NOVO: Sistemas de Inimigos com IA -->
-    <script src="enemy-projectiles.js"></script>
-    <script src="enemy-types.js"></script>
-    <script src="enemy-ai.js"></script>
+    <script src="js/systems/enemy-projectiles.js"></script>
+    <script src="js/systems/enemy-types.js"></script>
+    <script src="js/systems/enemy-ai.js"></script>
     
-    <script src="enemy-system.js"></script>
-    <script src="boss-system.js"></script>
-    <script src="phase-system.js"></script>
-    <script src="phase-effects.js"></script> <!-- Efeitos visuais das fases -->
+    <script src="js/systems/enemy-system.js"></script>
+    <script src="js/systems/boss-system.js"></script>
+    <script src="phases/phase-system.js"></script>
+    <script src="phases/phase-effects.js"></script> <!-- Efeitos visuais das fases -->
     
     <!-- ✨ NOVO: Sistemas de Transições e Parallax -->
-    <script src="phase-transitions.js"></script>
-    <script src="parallax-system.js"></script>
+    <script src="phases/phase-transitions.js"></script>
+    <script src="js/systems/parallax-system.js"></script>
     
     <!-- ✨ NOVO: Arquivos de Fases Individuais -->
-    <script src="phase1-ceu-sereno.js"></script>
-    <script src="phase2-tempestade-iminente.js"></script>
-    <script src="phase3-furia-ardente.js"></script>
-    <script src="phase4-abismo-sombrio.js"></script>
-    <script src="phase5-invasao-cosmica.js"></script>
-    <script src="phase-manager.js"></script> <!-- Gerenciador de fases -->
+    <script src="phases/phase1-ceu-sereno.js"></script>
+    <script src="phases/phase2-tempestade-iminente.js"></script>
+    <script src="phases/phase3-furia-ardente.js"></script>
+    <script src="phases/phase4-abismo-sombrio.js"></script>
+    <script src="phases/phase5-invasao-cosmica.js"></script>
+    <script src="phases/phase-manager.js"></script> <!-- Gerenciador de fases -->
     
-    <script src="spawn-system.js"></script>
-    <script src="collision-system.js"></script>
-    <script src="egg-system.js"></script>
-    <script src="phase-select.js"></script>
-    <script src="hud-system.js"></script>
-    <script src="integration.js"></script>
+    <script src="js/systems/spawn-system.js"></script>
+    <script src="js/systems/collision-system.js"></script>
+    <script src="js/systems/egg-system.js"></script>
+    <script src="ui/phase-select.js"></script>
+    <script src="ui/hud-system.js"></script>
+    <script src="js/core/integration.js"></script>
     
     <!-- 🔧 CRÍTICO: Menu System - ADICIONADO! -->
-    <script src="menu-system.js"></script>
+    <script src="ui/menu-system.js"></script>
     
     <!-- 🔧 NOVO: Controles Touch para Mobile -->
-    <script src="touch-controls.js"></script>
+    <script src="ui/touch-controls.js"></script>
     
     <!-- Inicialização -->
-    <script src="main.js"></script>
+    <script src="js/core/main.js"></script>
     
     <!-- ✨ ENHANCED: Integração de Efeitos Visuais -->
-    <script src="visual-integration.js"></script>
-    <script src="polish-system.js"></script>
+    <script src="js/effects/visual-integration.js"></script>
+    <script src="js/effects/polish-system.js"></script>
 </body>
 </html>
