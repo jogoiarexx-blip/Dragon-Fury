@@ -1278,3 +1278,83 @@ body {
 body[data-quality="low"] #gameCanvas{image-rendering:auto}
 body[data-quality="low"] .phase-loading-emblem{animation:none}
 @media(max-width:620px){#main-menu .main-menu-content{margin:0 auto;width:90%}#main-menu .menu-vignette{background:rgba(4,5,12,.72)}#main-menu .progress-panel{grid-template-columns:1fr 90px 1fr}}
+
+/* ===== DRAGON FURY v2.7 - UNIFIED COMMAND DECK UI ===== */
+:root{
+    --df-bg:#060815;
+    --df-panel:#0e1220;
+    --df-panel-2:#171c2d;
+    --df-line:rgba(255,255,255,.08);
+    --df-muted:#7f899f;
+    --df-text:#eef2fb;
+    --df-orange:#ff8a24;
+    --df-gold:#ffd04d;
+    --df-red:#ff4c38;
+    --df-green:#51d88a;
+}
+.df-screen{
+    position:absolute!important; inset:0; z-index:9300;
+    width:100%!important; height:100%!important;
+    padding:24px!important; margin:0!important;
+    overflow:hidden!important; text-align:left!important;
+    background:
+      radial-gradient(circle at 78% 22%,rgba(153,43,9,.25),transparent 34%),
+      linear-gradient(155deg,#060815 0%,#0a0c17 53%,#180905 100%)!important;
+    border:0!important; border-radius:0!important;
+    box-shadow:inset 0 0 95px rgba(0,0,0,.82)!important;
+    color:var(--df-text);
+}
+.df-screen::before{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(90deg,rgba(3,5,11,.90),rgba(3,5,11,.57) 62%,rgba(3,5,11,.20)),
+      radial-gradient(1px 1px at 20% 30%,rgba(255,208,77,.24),transparent),
+      radial-gradient(1px 1px at 70% 60%,rgba(255,138,36,.20),transparent);
+    background-size:auto,140px 140px,190px 190px;
+}
+.df-screen-shell{
+    position:relative; z-index:2; width:min(100%,470px); height:auto;
+    max-height:100%; margin:0 auto; padding:20px;
+    border:1px solid rgba(255,166,42,.27); border-radius:14px;
+    background:linear-gradient(180deg,rgba(20,25,42,.94),rgba(8,11,20,.95));
+    box-shadow:0 28px 70px rgba(0,0,0,.52), inset 0 1px rgba(255,255,255,.035);
+}
+.df-screen-shell::after{content:'';position:absolute;left:0;right:0;top:0;height:3px;border-radius:14px 14px 0 0;background:linear-gradient(90deg,transparent,var(--df-orange),var(--df-gold),var(--df-orange),transparent)}
+.df-screen-shell-wide{width:min(100%,520px)}
+.df-screen-shell-compact{width:min(100%,420px);top:50%;transform:translateY(-50%)}
+.df-screen-shell-result{width:min(100%,440px);top:50%;transform:translateY(-50%)}
+.df-scroll-shell{display:flex;flex-direction:column;height:100%;max-height:752px}
+.df-screen-topline{display:flex;justify-content:space-between;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--df-line);font:800 8px/1 Arial;letter-spacing:1.45px;color:#67728b}
+.df-screen-heading{display:flex;align-items:center;gap:14px;margin:17px 0 16px}.df-screen-heading>div:last-child{min-width:0}
+.df-screen-emblem,.df-center-emblem{display:grid;place-items:center;flex:0 0 auto;width:54px;height:54px;border:1px solid rgba(255,177,49,.28);border-radius:11px;background:radial-gradient(circle,rgba(255,130,31,.19),rgba(255,85,20,.025));color:var(--df-gold);font-weight:900;font-size:26px;box-shadow:0 0 28px rgba(255,110,21,.08)}
+.df-center-emblem{margin:22px auto 13px;width:70px;height:70px;border-radius:50%;font-size:28px}.df-center-emblem.trophy{font-size:35px}
+.df-screen-heading small,.df-kicker{display:block;color:#8b95aa;font:800 8px Arial;letter-spacing:1.6px;margin-bottom:5px}
+.df-screen-heading h2,.df-screen-shell>h2{margin:0!important;color:#fff0c6!important;font-size:24px!important;line-height:1.05;text-shadow:none!important;letter-spacing:.2px}
+.df-screen-heading p,.df-screen-copy{margin:5px 0 0;color:#818ca4;font-size:10px;line-height:1.55}
+.df-screen-shell-compact>h2,.df-screen-shell-result>h2{text-align:center!important;font-size:27px!important}.df-screen-shell-result>h3{text-align:center;color:#d6deee!important;font-size:15px!important;margin:5px 0 0!important;text-shadow:none!important}.df-kicker{text-align:center}
+.df-screen-copy{text-align:center;margin:8px auto 16px;max-width:330px}
+.df-action-stack{display:flex;flex-direction:column;gap:8px;margin-top:17px}.df-action-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.df-action-row .menu-button{width:100%!important;margin:0!important}.df-full-btn,.df-back-btn{width:100%!important;margin:0!important;min-height:42px!important}
+.df-screen .menu-button{max-width:none}.df-screen-footer{padding-top:13px;margin-top:auto;border-top:1px solid var(--df-line)}
+.df-result-status{width:max-content;margin:20px auto 10px;padding:5px 9px;border-radius:4px;font:900 8px Arial;letter-spacing:1.6px}.df-result-status.success{color:#9af2bc;border:1px solid rgba(81,216,138,.3);background:rgba(81,216,138,.08)}.df-result-status.danger{color:#ff8f81;border:1px solid rgba(255,76,56,.3);background:rgba(255,76,56,.08)}
+.df-stars{text-align:center;font-size:25px!important;letter-spacing:4px;margin:12px 0!important;animation:none!important;filter:drop-shadow(0 0 8px rgba(255,190,40,.2))}
+.df-rank-card{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;align-items:center;padding:11px 14px;margin:10px 0 12px;border-left:3px solid var(--df-orange);border-radius:0 8px 8px 0;background:linear-gradient(90deg,rgba(255,117,25,.11),rgba(255,255,255,.02));text-align:left}.df-rank-card small{grid-column:1;color:#78839a;font:800 8px Arial;letter-spacing:1.2px}.df-rank-card strong{grid-row:1/3;grid-column:2;font-size:32px;color:var(--df-gold)}.df-rank-card span{font-size:10px;color:#aab3c5}.df-rank-card p{display:none}
+.df-stat-grid{display:grid;gap:7px;margin:12px 0}.df-stat-grid.two{grid-template-columns:1fr 1fr}.df-stat-grid.three{grid-template-columns:repeat(3,1fr)}.df-stat-grid>div{min-height:57px;padding:10px;border:1px solid var(--df-line);border-radius:8px;background:rgba(255,255,255,.025);text-align:center;display:flex;flex-direction:column;justify-content:center}.df-stat-grid small{font:800 7px Arial;letter-spacing:1.2px;color:#737e95;margin-bottom:5px}.df-stat-grid strong{font-size:16px;color:#f4e1a8}.df-stat-grid .span-two{grid-column:span 2}
+.df-bonus-banner{margin:10px 0!important;padding:9px 12px;border:1px solid rgba(255,194,57,.18);border-radius:7px;background:rgba(255,174,35,.07);color:#ffc94f!important;font:800 9px Arial!important;letter-spacing:.5px;text-align:center}
+
+/* phase select */
+#phase-select-menu.menu{justify-content:flex-start;align-items:stretch}.phase-select-list{display:grid;grid-template-columns:1fr;gap:7px;width:100%;max-width:none;margin:0;overflow:auto;padding:1px 2px 10px}.phase-select-card{min-height:68px;padding:10px 12px;margin:0;background:linear-gradient(90deg,rgba(255,122,28,.09),rgba(255,255,255,.02));border:1px solid rgba(255,169,44,.19);border-radius:9px;box-shadow:none;gap:12px}.phase-select-card:hover{transform:translateX(3px);box-shadow:0 0 0 1px rgba(255,179,45,.18),0 9px 25px rgba(0,0,0,.22)}.phase-select-card-locked{opacity:.35}.phase-select-number{width:42px;height:42px;min-width:42px;display:grid;place-items:center;border-radius:8px;background:rgba(255,139,36,.08);border:1px solid rgba(255,176,44,.15);font-size:18px;color:var(--df-gold)}.phase-select-name{font-size:13px;letter-spacing:.2px}.phase-select-stars{font-size:12px;margin-top:5px;letter-spacing:2px}
+
+/* lists / achievements / upgrades */
+.df-list{flex:1;overflow:auto;padding:2px 3px 12px;scrollbar-width:thin;scrollbar-color:#4d5362 #0a0d17}.df-list-summary{padding:10px 12px;margin-bottom:10px;border:1px solid rgba(255,176,44,.14);border-radius:8px;background:rgba(255,138,36,.06);color:#d5deef;font-size:10px;line-height:1.55;text-align:left}.achievement,.upgrade-item{margin:0 0 7px;padding:11px 12px;background:rgba(255,255,255,.025);border:1px solid var(--df-line);border-radius:8px;box-shadow:none;transition:transform .15s,border-color .15s}.achievement:hover,.upgrade-item:hover{transform:translateX(2px);border-color:rgba(255,162,37,.25);box-shadow:none}.achievement.unlocked{background:linear-gradient(90deg,rgba(255,159,34,.08),rgba(255,255,255,.02));border-color:rgba(255,192,50,.24);box-shadow:none}.achievement-icon{font-size:27px;min-width:37px;margin-right:10px}.achievement-info h3,.upgrade-item h3{font-size:12px;color:#f1d58e;margin:0 0 4px}.achievement-info p,.upgrade-item p{font-size:10px;line-height:1.45;color:#8b95aa;margin:0}.upgrade-level,.upgrade-cost{font-size:10px;color:#c9d1e0;margin:7px 0 0;font-weight:700}.upgrade-cost{color:#e7bd5e}.upgrade-button{margin-top:8px;padding:8px 10px;font-size:9px;letter-spacing:.6px;border:1px solid rgba(255,181,48,.28);border-radius:6px;background:linear-gradient(90deg,#bb4a17,#e47b21)}.upgrade-button:hover:not(:disabled){transform:none;filter:brightness(1.08);box-shadow:none}.upgrade-button:disabled{background:#252a35;border-color:#343a47;color:#70798e}
+
+/* settings */
+.settings-panel{backdrop-filter:none!important}.settings-card{padding:20px!important}.df-settings-list{display:flex;flex-direction:column;margin:8px 0 10px}.df-settings-list label{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;padding:11px 0!important;border-bottom:1px solid var(--df-line)!important;color:#dce3ef!important;font-size:10px!important}.df-settings-list label>span{display:flex;flex-direction:column;gap:3px}.df-settings-list label b{font-size:11px;color:#e7ebf4}.df-settings-list label small{font-size:8px;color:#717c93}.df-settings-list select{min-width:110px;background:#080b13!important;color:#eef2fa!important;border:1px solid #343b4d!important;border-radius:6px!important;padding:7px!important;font-size:9px}.df-settings-list input{accent-color:var(--df-orange);width:17px!important;height:17px!important}.settings-stats{margin:12px 0!important;padding:8px 10px;border:1px solid var(--df-line);border-radius:7px;background:rgba(255,255,255,.02);font-size:8px!important;letter-spacing:.8px}.settings-stats b{color:var(--df-gold)!important}
+
+/* instructions */
+.df-instructions-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;overflow:auto;padding:1px 2px 10px}.df-instructions-grid section{padding:11px;border:1px solid var(--df-line);border-radius:8px;background:rgba(255,255,255,.025)}.df-instructions-grid section.wide{grid-column:1/-1}.df-instructions-grid section.tip{border-color:rgba(255,163,38,.18);background:rgba(255,130,28,.055)}.df-instructions-grid h3{font-size:10px;color:#efca72;margin:0 0 7px;letter-spacing:.4px}.df-instructions-grid p{font-size:9px;color:#909aaf;line-height:1.5;margin:3px 0}.df-instructions-grid b{color:#dbe2ef}
+
+/* result screens should not inherit legacy green/red layout */
+.pause-menu,.game-over,.stage-complete,.game-complete,.achievements-panel,.upgrades-panel,.instructions-panel{display:none}.pause-menu h2,.game-over h2,.stage-complete h2,.game-complete h2,.achievements-panel h2,.upgrades-panel h2{animation:none!important}.game-over p,.stage-complete p,.game-complete p{font-size:inherit;margin:0;color:inherit;text-shadow:none}.stage-complete-actions{margin-top:15px;display:flex;flex-direction:column}.stage-complete-btn{width:100%!important}.stage-complete-btn-secondary{background:rgba(255,255,255,.04)!important}
+
+@media(max-width:520px){
+  .df-screen{padding:12px!important}.df-screen-shell{padding:15px}.df-screen-shell-wide{width:100%}.df-screen-heading{margin:13px 0 12px}.df-screen-heading h2,.df-screen-shell>h2{font-size:21px!important}.df-screen-emblem{width:46px;height:46px;font-size:21px}.df-stat-grid.three{grid-template-columns:repeat(3,1fr)}.df-action-row{grid-template-columns:1fr 1fr}.df-instructions-grid{grid-template-columns:1fr}.df-instructions-grid section.wide{grid-column:auto}
+}

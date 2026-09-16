@@ -166,7 +166,7 @@ const phaseLoadingScreen = {
                     if (result && result.ok === false) failures.push(result.src);
                 }
             } catch (err) {
-                console.warn('⚠️ Falha durante loading de fase:', task.label, err);
+                debugWarn('⚠️ Falha durante loading de fase:', task.label, err);
                 if (task.isSprite) spritesDone++;
             }
             done++;
@@ -177,7 +177,7 @@ const phaseLoadingScreen = {
         }
 
         if (failures.length) {
-            console.warn('⚠️ Assets que falharam e foram ignorados para evitar travamento:', failures);
+            debugWarn('⚠️ Assets que falharam e foram ignorados para evitar travamento:', failures);
         }
 
         await this.nextPaint();

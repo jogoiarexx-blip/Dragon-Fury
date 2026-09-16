@@ -15,6 +15,10 @@ const spawnSystem = {
     update() {
         this.spawnTimer++;
         this.formationTimer++;
+
+        // Quando o Mission Director está ativo, ele controla o ritmo e as ondas.
+        // O spawn aleatório legado fica desativado para evitar sobreposição.
+        if (typeof missionDirector !== 'undefined' && missionDirector.active) return;
         
         const phase = phaseSystem.getCurrentPhase();
         const config = phase.spawnConfig;
@@ -238,13 +242,14 @@ const spawnSystem = {
                 break;
                 
             default:
-                console.warn('Tipo de inimigo desconhecido:', type);
+                debugWarn('Tipo de inimigo desconhecido:', type);
                 return;
         }
         
         if (enemy) {
             gameEntities.enemies.push(enemy);
         }
+        return enemy || null;
     },
     
     // Spawn de power-ups

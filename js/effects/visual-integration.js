@@ -119,4 +119,4 @@ if (typeof upgrades !== 'undefined') {
     };
 }
 
-console.log('✨ Integração de efeitos visuais avançados carregada!');
+debugLog('✨ Integração de efeitos visuais avançados carregada!');

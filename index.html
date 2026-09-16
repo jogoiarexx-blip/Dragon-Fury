@@ -50,12 +50,17 @@
             </div>
         </div>
 
-        <!-- ✨ NOVO: Seletor de Fases (Fase 1, Fase 2... com estrelas) -->
-        <div id="phase-select-menu" class="menu" style="display: none;">
-            <h1>🗺️ Selecionar Fase</h1>
-            <p class="phase-select-hint">Ganhe até 3 estrelas: rank alto + resgatar o 🥚 da fase</p>
-            <div id="phase-select-list" class="phase-select-list"></div>
-            <button class="menu-button" onclick="phaseSelectSystem.hide()">⬅️ Voltar</button>
+        <!-- Seletor de Fases -->
+        <div id="phase-select-menu" class="menu df-screen" style="display: none;">
+            <div class="df-screen-shell df-screen-shell-wide">
+                <div class="df-screen-topline"><span>DRAGON FURY // CAMPANHA</span><span>SELEÇÃO DE FASE</span></div>
+                <div class="df-screen-heading">
+                    <div class="df-screen-emblem">◆</div>
+                    <div><small>MAPA DE OPERAÇÕES</small><h2>SELECIONAR FASE</h2><p>Escolha uma missão liberada e tente conquistar as três estrelas.</p></div>
+                </div>
+                <div id="phase-select-list" class="phase-select-list"></div>
+                <div class="df-screen-footer"><button class="menu-button menu-button-secondary df-back-btn" onclick="phaseSelectSystem.hide()">‹ VOLTAR AO COMANDO</button></div>
+            </div>
         </div>
 
         <!-- Canvas do Jogo -->
@@ -81,13 +86,20 @@
         </div>
 
         <!-- Menu de Pause -->
-        <div id="pause-menu" class="pause-menu">
-            <h2>⏸️ PAUSADO</h2>
-            <button class="menu-button" onclick="game.resumeGame()">▶️ Continuar</button>
-            <button class="menu-button" onclick="ui.showUpgradesFromPause()">⚡ Upgrades</button>
-            <button class="menu-button" onclick="game.returnToMenu()">🏠 Menu Principal</button>
+        <div id="pause-menu" class="pause-menu df-screen">
+            <div class="df-screen-shell df-screen-shell-compact">
+                <div class="df-screen-topline"><span>DRAGON FURY // SISTEMA</span><span>JOGO SUSPENSO</span></div>
+                <div class="df-center-emblem">Ⅱ</div>
+                <small class="df-kicker">PAUSA TÁTICA</small>
+                <h2>MISSÃO PAUSADA</h2>
+                <p class="df-screen-copy">A ação está congelada. Retorne quando estiver pronto para continuar a investida.</p>
+                <div class="df-action-stack">
+                    <button class="menu-button menu-button-primary" onclick="game.resumeGame()"><span class="btn-icon">▶</span><span>CONTINUAR<small>Retomar missão</small></span><span class="btn-arrow">›</span></button>
+                    <button class="menu-button menu-button-wide" onclick="ui.showUpgradesFromPause()"><span class="btn-icon">⚡</span><span>UPGRADES</span><span class="btn-arrow">›</span></button>
+                    <button class="menu-button menu-button-secondary df-full-btn" onclick="game.returnToMenu()"><span>⌂ MENU PRINCIPAL</span></button>
+                </div>
+            </div>
         </div>
-
 
         <!-- Loading real entre fases -->
         <div id="phase-loading-screen" class="phase-loading-screen" aria-hidden="true">
@@ -116,84 +128,122 @@
         </div>
 
         <!-- Fase Completa -->
-        <div id="stage-complete" class="stage-complete">
-            <h2 id="stage-complete-title">Fase Completa!</h2>
-            <h3 id="stage-complete-name">Céu Sereno</h3>
-            <div class="stage-complete-stars">⭐⭐⭐</div>
-            <div id="rank-display" class="rank-display">
-                <p>Rank: <span id="final-rank">B</span></p>
-                <p>Bônus: <span id="rank-bonus">25</span> moedas</p>
-            </div>
-            <p>Pontuação: <span id="stage-complete-score">0</span></p>
-            <p>Moedas: <span id="stage-complete-coins">0</span></p>
-
-            <!-- 🔧 NOVO: Seletor de fase - substitui o antigo avanço
-                 automático por 3 escolhas explícitas do jogador -->
-            <div id="stage-complete-actions" class="stage-complete-actions">
-                <button id="stage-complete-next-btn" class="menu-button stage-complete-btn"
-                        onclick="game.nextStage()">▶️ Próxima Fase</button>
-                <button class="menu-button stage-complete-btn stage-complete-btn-secondary"
-                        onclick="game.repeatStage()">🔁 Repetir Fase</button>
-                <button class="menu-button stage-complete-btn stage-complete-btn-secondary"
-                        onclick="ui.showUpgradesFromStageComplete()">🛒 Comprar Upgrade</button>
+        <div id="stage-complete" class="stage-complete df-screen">
+            <div class="df-screen-shell df-screen-shell-result">
+                <div class="df-screen-topline"><span>DRAGON FURY // RELATÓRIO</span><span>MISSÃO CONCLUÍDA</span></div>
+                <div class="df-result-status success">MISSÃO COMPLETA</div>
+                <h2 id="stage-complete-title">Fase Completa!</h2>
+                <h3 id="stage-complete-name">Céu Sereno</h3>
+                <div class="stage-complete-stars df-stars">⭐⭐⭐</div>
+                <div id="rank-display" class="rank-display df-rank-card">
+                    <small>CLASSIFICAÇÃO</small><strong id="final-rank">B</strong><span>Bônus: <b id="rank-bonus">25</b> moedas</span>
+                </div>
+                <div class="df-stat-grid two">
+                    <div><small>PONTUAÇÃO</small><strong id="stage-complete-score">0</strong></div>
+                    <div><small>MOEDAS</small><strong id="stage-complete-coins">0</strong></div>
+                </div>
+                <div id="stage-complete-actions" class="stage-complete-actions df-action-stack">
+                    <button id="stage-complete-next-btn" class="menu-button menu-button-primary stage-complete-btn" onclick="game.nextStage()"><span class="btn-icon">▶</span><span>PRÓXIMA FASE<small>Continuar campanha</small></span><span class="btn-arrow">›</span></button>
+                    <div class="df-action-row"><button class="menu-button menu-button-secondary stage-complete-btn" onclick="game.repeatStage()">↻ REPETIR</button><button class="menu-button menu-button-secondary stage-complete-btn" onclick="ui.showUpgradesFromStageComplete()">⚡ UPGRADES</button></div>
+                </div>
             </div>
         </div>
 
         <!-- Jogo Completo -->
-        <div id="game-complete" class="game-complete">
-            <h2>🏆 PARABÉNS! 🏆</h2>
-            <h3>VOCÊ COMPLETOU DRAGON FURY!</h3>
-            <div class="game-complete-stars">⭐⭐⭐⭐⭐</div>
-            <p>Pontuação Final: <span id="game-complete-score">0</span></p>
-            <p>Moedas Totais: <span id="game-complete-coins">0</span></p>
-            <p>Rank Final: <span id="game-complete-rank">A</span></p>
-            <p class="game-complete-bonus">🎁 Bônus: +1000 Moedas!</p>
-            <button class="menu-button" onclick="game.restartGame()">🔄 Jogar Novamente</button>
-            <button class="menu-button" onclick="game.returnToMenu()">🏠 Menu Principal</button>
+        <div id="game-complete" class="game-complete df-screen">
+            <div class="df-screen-shell df-screen-shell-result">
+                <div class="df-screen-topline"><span>DRAGON FURY // CAMPANHA</span><span>OPERAÇÃO ENCERRADA</span></div>
+                <div class="df-center-emblem trophy">🏆</div>
+                <small class="df-kicker">VITÓRIA TOTAL</small>
+                <h2>DRAGON FURY CONCLUÍDO</h2>
+                <p class="df-screen-copy">Você atravessou todas as zonas hostis e derrotou as ameaças da campanha.</p>
+                <div class="game-complete-stars df-stars">⭐⭐⭐⭐⭐</div>
+                <div class="df-stat-grid three">
+                    <div><small>PONTOS</small><strong id="game-complete-score">0</strong></div>
+                    <div><small>MOEDAS</small><strong id="game-complete-coins">0</strong></div>
+                    <div><small>RANK</small><strong id="game-complete-rank">A</strong></div>
+                </div>
+                <div class="game-complete-bonus df-bonus-banner">🎁 BÔNUS DE CAMPANHA +1000 MOEDAS</div>
+                <div class="df-action-stack"><button class="menu-button menu-button-primary" onclick="game.restartGame()"><span class="btn-icon">↻</span><span>JOGAR NOVAMENTE<small>Reiniciar campanha</small></span><span class="btn-arrow">›</span></button><button class="menu-button menu-button-secondary df-full-btn" onclick="game.returnToMenu()">⌂ MENU PRINCIPAL</button></div>
+            </div>
         </div>
 
         <!-- Game Over -->
-        <div id="game-over" class="game-over">
-            <h2>💀 GAME OVER</h2>
-            <p>Fase Alcançada: <span id="final-stage">1</span></p>
-            <p>Rank Final: <span id="gameover-rank">C</span></p>
-            <p>Pontuação Final: <span id="final-score">0</span></p>
-            <p>Moedas Coletadas: <span id="final-coins">0</span></p>
-            <p>Distância Percorrida: <span id="final-distance">0</span>m</p>
-            <button class="menu-button" onclick="game.restartGame()">🔄 Jogar Novamente</button>
-            <button class="menu-button" onclick="game.returnToMenu()">🏠 Menu Principal</button>
+        <div id="game-over" class="game-over df-screen">
+            <div class="df-screen-shell df-screen-shell-result danger-shell">
+                <div class="df-screen-topline"><span>DRAGON FURY // RELATÓRIO</span><span>SINAL PERDIDO</span></div>
+                <div class="df-result-status danger">MISSÃO FALHOU</div>
+                <h2>GAME OVER</h2>
+                <p class="df-screen-copy">A investida terminou, mas seus recursos e progresso permanente continuam disponíveis.</p>
+                <div class="df-stat-grid three">
+                    <div><small>FASE</small><strong id="final-stage">1</strong></div>
+                    <div><small>RANK</small><strong id="gameover-rank">C</strong></div>
+                    <div><small>PONTOS</small><strong id="final-score">0</strong></div>
+                    <div><small>MOEDAS</small><strong id="final-coins">0</strong></div>
+                    <div class="span-two"><small>DISTÂNCIA</small><strong><span id="final-distance">0</span>m</strong></div>
+                </div>
+                <div class="df-action-stack"><button class="menu-button menu-button-primary" onclick="game.restartGame()"><span class="btn-icon">↻</span><span>TENTAR NOVAMENTE<small>Reiniciar missão</small></span><span class="btn-arrow">›</span></button><button class="menu-button menu-button-secondary df-full-btn" onclick="game.returnToMenu()">⌂ MENU PRINCIPAL</button></div>
+            </div>
         </div>
 
         <!-- Painel de Conquistas -->
-        <div id="achievements-panel" class="achievements-panel">
-            <h2>🏆 CONQUISTAS</h2>
-            <div id="achievements-list"></div>
-            <button class="close-button" onclick="ui.closeAchievements()">Fechar</button>
+        <div id="achievements-panel" class="achievements-panel df-screen">
+            <div class="df-screen-shell df-screen-shell-wide df-scroll-shell">
+                <div class="df-screen-topline"><span>DRAGON FURY // ARQUIVOS</span><span>CONQUISTAS</span></div>
+                <div class="df-screen-heading"><div class="df-screen-emblem">🏆</div><div><small>REGISTRO DE PILOTO</small><h2>CONQUISTAS</h2><p>Objetivos especiais registrados durante a campanha.</p></div></div>
+                <div id="achievements-list" class="df-list"></div>
+                <div class="df-screen-footer"><button class="menu-button menu-button-secondary df-back-btn" onclick="ui.closeAchievements()">‹ VOLTAR</button></div>
+            </div>
         </div>
 
         <!-- Configurações -->
-        <div id="settings-panel" class="settings-panel" style="display:none;">
-            <div class="settings-card">
-                <h2>⚙ CONFIGURAÇÕES</h2>
-                <label>Qualidade gráfica<select id="quality-select"><option value="auto">Automático</option><option value="low">Baixo</option><option value="medium">Médio</option><option value="high">Alto</option></select></label>
-                <label class="setting-toggle"><span>Screen shake</span><input id="shake-toggle" type="checkbox" checked></label>
-                <label class="setting-toggle"><span>Hit stop</span><input id="hitstop-toggle" type="checkbox" checked></label>
-                <label class="setting-toggle"><span>Partículas</span><input id="particles-toggle" type="checkbox" checked></label>
-                <div class="settings-stats"><span>FPS <b id="settings-fps">60</b></span><span>Qualidade <b id="settings-quality">ALTO</b></span></div>
-                <button class="menu-button" onclick="polishSystem.closeSettings()">Fechar</button>
+        <div id="settings-panel" class="settings-panel df-screen" style="display:none;">
+            <div class="df-screen-shell df-screen-shell-compact settings-card">
+                <div class="df-screen-topline"><span>DRAGON FURY // SISTEMA</span><span>CONFIGURAÇÕES</span></div>
+                <div class="df-screen-heading"><div class="df-screen-emblem">⚙</div><div><small>PAINEL DE CONTROLE</small><h2>CONFIGURAÇÕES</h2><p>Ajuste desempenho e resposta visual.</p></div></div>
+                <div class="df-settings-list">
+                    <label><span><b>Qualidade gráfica</b><small>Equilibra efeitos e desempenho</small></span><select id="quality-select"><option value="auto">Automático</option><option value="low">Baixo</option><option value="medium">Médio</option><option value="high">Alto</option></select></label>
+                    <label class="setting-toggle"><span><b>Screen shake</b><small>Impacto de câmera em golpes fortes</small></span><input id="shake-toggle" type="checkbox" checked></label>
+                    <label class="setting-toggle"><span><b>Hit stop</b><small>Pausa curta em impactos importantes</small></span><input id="hitstop-toggle" type="checkbox" checked></label>
+                    <label class="setting-toggle"><span><b>Partículas</b><small>Faíscas, explosões e rastros</small></span><input id="particles-toggle" type="checkbox" checked></label>
+                </div>
+                <div class="settings-stats"><span>FPS <b id="settings-fps">60</b></span><span>QUALIDADE <b id="settings-quality">ALTO</b></span></div>
+                <button class="menu-button menu-button-secondary df-full-btn" onclick="polishSystem.closeSettings()">‹ VOLTAR</button>
             </div>
         </div>
 
         <!-- Painel de Upgrades -->
-        <div id="upgrades-panel" class="upgrades-panel">
-            <h2>⚡ UPGRADES</h2>
-            <div id="upgrades-list"></div>
-            <button class="close-button" onclick="ui.closeUpgrades()">Fechar</button>
+        <div id="upgrades-panel" class="upgrades-panel df-screen">
+            <div class="df-screen-shell df-screen-shell-wide df-scroll-shell">
+                <div class="df-screen-topline"><span>DRAGON FURY // HANGAR</span><span>UPGRADES</span></div>
+                <div class="df-screen-heading"><div class="df-screen-emblem">⚡</div><div><small>OFICINA DE COMBATE</small><h2>UPGRADES</h2><p>Invista moedas em melhorias permanentes.</p></div></div>
+                <div id="upgrades-list" class="df-list"></div>
+                <div class="df-screen-footer"><button class="menu-button menu-button-secondary df-back-btn" onclick="ui.closeUpgrades()">‹ VOLTAR</button></div>
+            </div>
+        </div>
+
+        <!-- Como Jogar -->
+        <div id="instructions-panel" class="instructions-panel df-screen" style="display:none;">
+            <div class="df-screen-shell df-screen-shell-wide df-scroll-shell">
+                <div class="df-screen-topline"><span>DRAGON FURY // MANUAL</span><span>COMO JOGAR</span></div>
+                <div class="df-screen-heading"><div class="df-screen-emblem">?</div><div><small>PROTOCOLO DE VOO</small><h2>COMO JOGAR</h2><p>Controles, objetivos e sistemas essenciais.</p></div></div>
+                <div class="df-instructions-grid">
+                    <section><h3>🎮 CONTROLES</h3><p><b>WASD / Setas</b> — mover</p><p><b>F / Espaço</b> — atirar</p><p><b>ESC</b> — pausar</p></section>
+                    <section><h3>🎯 OBJETIVO</h3><p>Elimine a meta de inimigos, sobreviva à onda e derrote o boss de cada fase.</p></section>
+                    <section><h3>⚡ POWER-UPS</h3><p>Vida, tiro rápido, escudo e bomba ajudam durante a missão.</p></section>
+                    <section><h3>🛠 UPGRADES</h3><p>Use moedas para melhorar fogo, vida, velocidade, tiro múltiplo e defesa.</p></section>
+                    <section class="wide"><h3>🐉 CAMPANHA</h3><p>5 fases progressivas: Céu Sereno, Tempestade Iminente, Fúria Ardente, Abismo Sombrio e Invasão Cósmica.</p></section>
+                    <section class="wide tip"><h3>⚠ DICA TÁTICA</h3><p>Priorize atiradores, colete moedas e preserve seus recursos para a chegada cinematográfica do boss.</p></section>
+                </div>
+                <div class="df-screen-footer"><button class="menu-button menu-button-secondary df-back-btn" onclick="ui.closeInstructions()">‹ VOLTAR</button></div>
+            </div>
         </div>
     </div>
 
     <!-- 🔧 NOVO: helpers de polígonos (usados por inimigos e bosses) -->
     <script src="js/core/geo-utils.js"></script>
+    <script src="js/core/debug.js"></script>
+    <script src="js/core/save-system.js"></script>
     
     <!-- 🔧 NOVO: sistema de áudio sintetizado (Web Audio API) -->
     <script src="js/systems/audio-system.js"></script>
@@ -247,6 +297,7 @@
     <script src="phases/phase-manager.js"></script> <!-- Gerenciador de fases -->
     
     <script src="js/systems/spawn-system.js"></script>
+    <script src="phases/mission-system.js"></script>
     <script src="js/systems/collision-system.js"></script>
     <script src="js/systems/egg-system.js"></script>
     <script src="ui/phase-select.js"></script>

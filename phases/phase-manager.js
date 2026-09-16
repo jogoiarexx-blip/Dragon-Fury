@@ -14,7 +14,7 @@ const phaseManager = {
             5: phase5_invasaoCosmica
         };
         
-        console.log('✅ PhaseManager inicializado com', Object.keys(this.phases).length, 'fases');
+        debugLog('✅ PhaseManager inicializado com', Object.keys(this.phases).length, 'fases');
     },
     
     // Carregar uma fase específica
@@ -32,7 +32,7 @@ const phaseManager = {
         }
         
         this.currentPhase = this.phases[phaseNumber];
-        console.log('📍 Fase carregada:', this.currentPhase.name);
+        debugLog('📍 Fase carregada:', this.currentPhase.name);
         
         // Aplicar configurações da fase ao gameData
         gameData.scrollSpeed = 2 * this.currentPhase.config.speedMultiplier;

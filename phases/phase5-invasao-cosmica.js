@@ -1,9 +1,9 @@
-// ===== FASE 5: BATALHA FINAL =====
+// ===== FASE 5: INVASÃO CÓSMICA =====
 
-const phase5_batalhaFinal = {
+const phase5_invasaoCosmica = {
     id: 5,
-    name: 'Batalha Final',
-    description: 'O confronto definitivo - O destino de todos está em suas mãos',
+    name: 'Invasão Cósmica',
+    description: 'Forças alienígenas invadem os céus em uma ofensiva cósmica',
     
     // Configurações gerais
     config: {

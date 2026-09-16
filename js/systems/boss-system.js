@@ -1044,4 +1044,4 @@ if (typeof window !== 'undefined') {
     };
 }
 
-console.log('👑 Sistema de Bosses V2 carregado com sucesso!');
+debugLog('👑 Sistema de Bosses V2 carregado com sucesso!');

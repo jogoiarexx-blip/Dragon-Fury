@@ -146,12 +146,18 @@ const hudSystem = {
         ctx.lineWidth = 2;
         ctx.strokeRect(barX, barY, barWidth, barHeight);
         
-        // Texto do progresso
+        // Texto do progresso da missão (não contador de kills)
         ctx.fillStyle = '#FFF';
-        ctx.font = 'bold 12px Arial';
+        ctx.font = 'bold 11px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(`${progress.current}/${progress.target} (${progress.percentage}%)`, 
-                     barX + barWidth / 2, barY + barHeight / 2 + 4);
+        const progressText = progress.label ? `${progress.label} • ${progress.percentage}%` : `${progress.percentage}%`;
+        ctx.fillText(progressText, barX + barWidth / 2, barY + barHeight / 2 + 4);
+
+        if (progress.detail) {
+            ctx.fillStyle = 'rgba(255,255,255,.75)';
+            ctx.font = '10px Arial';
+            ctx.fillText(progress.detail, barX + barWidth / 2, barY + barHeight + 13);
+        }
         
         ctx.shadowBlur = 0;
         ctx.textAlign = 'left';

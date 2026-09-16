@@ -35,3 +35,8 @@ dragon-fury/
 ```
 
 `index.html` permanece na raiz para GitHub Pages. As pastas `ui/` e `phases/` também ficam diretamente na raiz, enquanto o código geral permanece organizado em `js/`.
+
+
+## Core additions
+- `js/core/debug.js`: logs de desenvolvimento sob `?debug=1`.
+- `js/core/save-system.js`: camada segura e central para persistência.

@@ -867,12 +867,12 @@ const entities = {
         
         // ✨ CORREÇÃO: Verificação de segurança - se o boss está fora da tela, reposicionar
         if (boss.y < -200 || boss.y > gameData.canvas.height) {
-            console.warn('Boss fora da tela! Reposicionando...', boss.y);
+            debugWarn('Boss fora da tela! Reposicionando...', boss.y);
             boss.y = boss.targetY || 80;
         }
         
         if (boss.x < -boss.width || boss.x > gameData.canvas.width) {
-            console.warn('Boss fora da tela (X)! Reposicionando...', boss.x);
+            debugWarn('Boss fora da tela (X)! Reposicionando...', boss.x);
             boss.x = gameData.canvas.width / 2 - boss.width / 2;
         }
         

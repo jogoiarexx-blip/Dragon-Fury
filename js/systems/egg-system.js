@@ -1,12 +1,12 @@
 // ===== SISTEMA DE OVO RESGATÁVEL - DRAGON FURY =====
-// ✨ NOVO: em cada fase, um ovo de dragão aparece na metade do caminho até
-// o boss. O jogador pode voar até ele para "resgatá-lo" e ganhar um bônus
+// ✨ Em cada fase, um ovo de dragão aparece perto da metade da MISSÃO.
+// O jogador pode voar até ele para "resgatá-lo" e ganhar um bônus
 // de moedas/pontos. Não é obrigatório (não trava a fase se não pegar), só
 // um objetivo extra - reduz o risco de reintroduzir travamentos.
 
 const eggSystem = {
-    // Tenta spawnar o ovo da fase atual quando o jogador atinge metade
-    // dos kills necessários para o boss aparecer
+    // Tenta spawnar o ovo quando a missão chega perto de 45%.
+    // Kills não controlam mais a progressão da fase.
     trySpawnEgg() {
         if (gameData.eggSpawnedThisStage) return;
         if (gameData.bossActive) return;
@@ -14,9 +14,9 @@ const eggSystem = {
         
         const phase = phaseSystem.getCurrentPhase();
         if (!phase) return;
-        
-        const halfway = Math.floor(phase.targetKills / 2);
-        if (gameData.enemiesKilledThisStage >= halfway) {
+
+        const progress = phaseSystem.getPhaseProgress ? phaseSystem.getPhaseProgress() : null;
+        if (progress && progress.percentage >= 45) {
             this.spawnEgg();
         }
     },

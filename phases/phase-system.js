@@ -2,12 +2,6 @@
 
 const phaseSystem = {
     currentPhase: 1,
-    // 🔧 BUGFIX: só existem arquivos/conteúdo completos para as fases 1-5
-    // (phase1-ceu-sereno.js ... phase5-invasao-cosmica.js, e data.js.stages
-    // também só vai até 5). A entrada "6: Batalha Final" abaixo era código
-    // morto que nunca tinha assets próprios; se currentPhase chegasse a 6
-    // outras partes do jogo que só sabem contar até 5 quebrariam. Fase 5
-    // agora é a fase final.
     maxPhases: 5,
     
     phases: {
@@ -169,37 +163,6 @@ const phaseSystem = {
                 cloudDensity: 0,
                 warpEffect: true
             }
-        },
-        
-        6: {
-            name: 'Batalha Final',
-            description: 'O confronto definitivo',
-            background: {
-                primary: '#330022',
-                secondary: '#550033',
-                tertiary: '#220011'
-            },
-            scrollSpeed: 4.5,
-            targetKills: 70,
-            
-            spawnConfig: {
-                enemies: ['zigzag', 'tank', 'sniper', 'kamikaze', 'parasite', 'summoner'],
-                spawnRate: 0.045,
-                maxEnemies: 20,
-                difficultyMultiplier: 3.0
-            },
-            
-            boss: {
-                type: 'ChaosGeometryBoss',
-                spawnCondition: 'kills'
-            },
-            
-            ambience: {
-                starDensity: 150,
-                starSpeed: 2.5,
-                cloudDensity: 8,
-                chaosEffect: true
-            }
         }
     },
     
@@ -232,8 +195,14 @@ const phaseSystem = {
         // Resetar contador de kills
         gameData.enemiesKilledThisStage = 0;
         gameData.bossActive = false;
+        gameData.eggSpawnedThisStage = false;
+        gameData.eggRescuedThisStage = false;
+        if (gameEntities.eggs) gameEntities.eggs.length = 0;
+
+        // Novo fluxo: a progressão é dirigida por missão/ondas, não por kills.
+        if (typeof missionDirector !== 'undefined') missionDirector.startPhase(phaseNum);
         
-        console.log(`✅ Fase ${phaseNum} carregada: ${phase.name}`);
+        debugLog(`✅ Fase ${phaseNum} carregada: ${phase.name}`);
         ui.showNotification(`🎮 Fase ${phaseNum}: ${phase.name}`);
     },
     
@@ -347,11 +316,19 @@ const phaseSystem = {
     },
     
     getPhaseProgress() {
+        if (gameData.bossActive) {
+            return { current: 1, target: 1, percentage: 100, label: 'BOSS', detail: 'Confronto principal' };
+        }
+        if (typeof missionDirector !== 'undefined' && missionDirector.active) {
+            return missionDirector.getProgress();
+        }
         const phase = this.getCurrentPhase();
         return {
             current: gameData.enemiesKilledThisStage,
             target: phase.targetKills,
-            percentage: Math.floor((gameData.enemiesKilledThisStage / phase.targetKills) * 100)
+            percentage: Math.floor((gameData.enemiesKilledThisStage / Math.max(1, phase.targetKills)) * 100),
+            label: 'Combate',
+            detail: 'Elimine as ameaças'
         };
     },
     
@@ -366,6 +343,13 @@ const phaseSystem = {
         // fase completa aparecer.
         if (gameData.gameState !== 'playing') return false;
         
+        // O boss agora é liberado pelo roteiro da missão, somente após
+        // ondas/eventos/elite e limpeza da arena.
+        if (typeof missionDirector !== 'undefined' && missionDirector.isBossReady) {
+            return missionDirector.isBossReady();
+        }
+
+        // Fallback legado apenas se o Mission Director não estiver disponível.
         if (phase.boss.spawnCondition === 'kills') {
             return gameData.enemiesKilledThisStage >= phase.targetKills;
         }
@@ -380,6 +364,7 @@ const phaseSystem = {
         if (typeof window.BossClasses !== 'undefined' && window.BossClasses[bossType]) {
             gameEntities.boss = new window.BossClasses[bossType]();
             gameData.bossActive = true;
+            if (typeof missionDirector !== 'undefined' && missionDirector.onBossSpawned) missionDirector.onBossSpawned();
             // A apresentação completa é assumida pelo Boss Cinematic System.
             // Fallback: se ele não existir, mantém o alerta legado.
             if (typeof polishSystem === 'undefined' || !polishSystem.startBossIntro) {

@@ -34,7 +34,7 @@ const audioSystem = {
                 this.masterGain.gain.value = this.muted ? 0 : 0.35;
                 this.masterGain.connect(this.ctx.destination);
             } catch (e) {
-                console.warn('🔇 Web Audio API indisponível neste navegador:', e.message);
+                debugWarn('🔇 Web Audio API indisponível neste navegador:', e.message);
             }
         };
         ['click', 'touchstart', 'keydown'].forEach(evt => {

@@ -172,11 +172,11 @@ const parallaxSystem = {
         const config = this.phaseConfigs[phaseNumber];
         
         if (!config) {
-            console.warn('⚠️ Configuração de parallax não encontrada para fase', phaseNumber);
+            debugWarn('⚠️ Configuração de parallax não encontrada para fase', phaseNumber);
             return;
         }
         
-        console.log(`🌌 Inicializando parallax para Fase ${phaseNumber}`);
+        debugLog(`🌌 Inicializando parallax para Fase ${phaseNumber}`);
         
         // Criar cada camada
         config.layers.forEach(layerConfig => {
@@ -196,7 +196,7 @@ const parallaxSystem = {
             this.layers.push(layer);
         });
         
-        console.log(`✅ ${this.layers.length} camadas de parallax criadas`);
+        debugLog(`✅ ${this.layers.length} camadas de parallax criadas`);
     },
     
     // Criar uma partícula baseada na configuração

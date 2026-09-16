@@ -150,27 +150,27 @@ const game = {
     
     // 🔧 NOVO: Função centralizada para limpar todos os timers
     clearAllTimers() {
-        console.log('🧹 Limpando todos os timers...');
+        debugLog('🧹 Limpando todos os timers...');
         
         // Limpar timer de auto-avanço de fase
         if (gameData.stageCompleteTimer) {
             clearTimeout(gameData.stageCompleteTimer);
             gameData.stageCompleteTimer = null;
-            console.log('  ✅ stageCompleteTimer limpo');
+            debugLog('  ✅ stageCompleteTimer limpo');
         }
         
         // Limpar contador regressivo visual
         if (gameData.stageCompleteCountdown) {
             clearInterval(gameData.stageCompleteCountdown);
             gameData.stageCompleteCountdown = null;
-            console.log('  ✅ stageCompleteCountdown limpo');
+            debugLog('  ✅ stageCompleteCountdown limpo');
         }
         
         // 🔧 ADICIONAL: Limpar animationFrame se existir
         if (gameData.animationId) {
             cancelAnimationFrame(gameData.animationId);
             gameData.animationId = null;
-            console.log('  ✅ animationFrame cancelado');
+            debugLog('  ✅ animationFrame cancelado');
         }
     },
     
@@ -197,7 +197,7 @@ const game = {
     },
     
     returnToMenu() {
-        console.log('🏠 Retornando ao menu principal...');
+        debugLog('🏠 Retornando ao menu principal...');
         
         // 🔧 BUGFIX: Limpar timers PRIMEIRO (antes de mudar estado)
         this.clearAllTimers();
@@ -219,11 +219,11 @@ const game = {
         
         document.getElementById('main-menu').style.display = 'block';
         
-        console.log('✅ Retorno ao menu concluído');
+        debugLog('✅ Retorno ao menu concluído');
     },
     
     restartGame() {
-        console.log('🔄 Reiniciando jogo...');
+        debugLog('🔄 Reiniciando jogo...');
         
         // 🔧 BUGFIX: Limpar timers antes de reiniciar
         this.clearAllTimers();
@@ -244,7 +244,7 @@ const game = {
         // tela de fase completa por cima dela mesma.
         if (gameData.gameState === 'stage_complete') return;
         
-        console.log(`🎉 Fase ${gameData.currentStage} completa!`);
+        debugLog(`🎉 Fase ${gameData.currentStage} completa!`);
         
         // 🔧 BUGFIX: Limpar timers antigos ANTES de criar novos
         this.clearAllTimers();
@@ -284,14 +284,14 @@ const game = {
         const targetStage = previousStage + 1;
 
         if (targetStage > phaseSystem.maxPhases) {
-            console.log('🏆 Todas as fases completadas!');
+            debugLog('🏆 Todas as fases completadas!');
             this.clearAllTimers();
             ui.hideStageComplete();
             this.gameComplete();
             return;
         }
 
-        console.log(`➡️ Preparando fase ${targetStage}...`);
+        debugLog(`➡️ Preparando fase ${targetStage}...`);
         this.clearAllTimers();
         ui.hideStageComplete();
 
@@ -306,7 +306,7 @@ const game = {
             } catch (err) {
                 // O loading nunca deve prender o jogador. Falhas são registradas
                 // e a fase segue com os fallbacks/procedurais disponíveis.
-                console.warn('⚠️ Loading da fase concluiu com falha recuperável:', err);
+                debugWarn('⚠️ Loading da fase concluiu com falha recuperável:', err);
             }
         }
 
@@ -315,7 +315,7 @@ const game = {
         gameData.currentWave = 1;
         entities.waveTimer = 0;
 
-        console.log(`📍 Nova fase: ${gameData.currentStage} - ${phaseSystem.getCurrentPhase().name}`);
+        debugLog(`📍 Nova fase: ${gameData.currentStage} - ${phaseSystem.getCurrentPhase().name}`);
 
         // Limpar entidades antigas antes de liberar a nova fase.
         gameEntities.enemies = [];
@@ -373,7 +373,7 @@ const game = {
     repeatStage() {
         if (gameData.gameState !== 'stage_complete') return;
         
-        console.log(`🔁 Repetindo fase ${gameData.currentStage}...`);
+        debugLog(`🔁 Repetindo fase ${gameData.currentStage}...`);
         
         this.clearAllTimers();
         ui.hideStageComplete();
@@ -422,7 +422,7 @@ const game = {
     },
     
     gameComplete() {
-        console.log('🏆 Jogo completado!');
+        debugLog('🏆 Jogo completado!');
         
         // 🔧 BUGFIX: Limpar timers ao completar jogo
         this.clearAllTimers();
@@ -696,7 +696,7 @@ const game = {
     },
     
     gameOver() {
-        console.log('💀 Game Over');
+        debugLog('💀 Game Over');
         
         // 🔧 BUGFIX: Limpar timers ao dar game over
         this.clearAllTimers();

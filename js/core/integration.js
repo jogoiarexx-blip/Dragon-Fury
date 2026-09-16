@@ -19,7 +19,7 @@ const gameIntegration = {
     init() {
         if (this.initialized) return;
         
-        console.log('🔧 Inicializando sistemas avançados...');
+        debugLog('🔧 Inicializando sistemas avançados...');
         
         // 🔧 BUGFIX CRÍTICO: gameIntegration.init() roda no DOMContentLoaded
         // ANTES de game.init() (integration.js registra seu listener antes
@@ -59,7 +59,7 @@ const gameIntegration = {
         this.integrateWithDraw();
         
         this.initialized = true;
-        console.log('✅ Sistemas avançados carregados!');
+        debugLog('✅ Sistemas avançados carregados!');
     },
     
     integrateWithGameLoop() {
@@ -80,6 +80,9 @@ const gameIntegration = {
             // Update do jogador
             dragon.update();
             
+            // Mission Director controla o roteiro/ondas da fase.
+            if (typeof missionDirector !== 'undefined') missionDirector.update();
+
             // Update dos sistemas novos
             spawnSystem.update();
             spawnSystem.spawnPowerUp();
@@ -142,18 +145,19 @@ const gameIntegration = {
                 pu.y += pu.speed;
             });
             
-            // Update de partículas
-            // CORREÇÃO: loop reverso para não pular partículas ao usar splice
-            for (let index = gameEntities.particles.length - 1; index >= 0; index--) {
+            // Update de partículas sem splice por item. Compacta o mesmo array
+            // em uma única passada, reduzindo alocações e pausas do GC em explosões.
+            let particleWrite = 0;
+            for (let index = 0; index < gameEntities.particles.length; index++) {
                 const particle = gameEntities.particles[index];
-                particle.x += particle.vx;
-                particle.y += particle.vy;
+                particle.x += particle.vx || 0;
+                particle.y += particle.vy || 0;
                 particle.life--;
-                
-                if (particle.life <= 0) {
-                    gameEntities.particles.splice(index, 1);
+                if (particle.life > 0) {
+                    gameEntities.particles[particleWrite++] = particle;
                 }
             }
+            gameEntities.particles.length = particleWrite;
             
             // 🔧 BUGFIX (desempenho): sem limite, um combo grande ou a morte
             // de um boss (64+ partículas de uma vez, em BaseBoss.destroy())

@@ -218,5 +218,5 @@ if (typeof window !== 'undefined') {
     window.boostParticles = new BoostParticles();
     window.powerUpAura = new PowerUpAura();
     
-    console.log('✨ Sistemas de efeitos visuais avançados carregados!');
+    debugLog('✨ Sistemas de efeitos visuais avançados carregados!');
 }

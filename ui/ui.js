@@ -87,7 +87,7 @@ const ui = {
         
         const progress = achievementManager.getProgress();
         const progressDiv = document.createElement('div');
-        progressDiv.style.cssText = 'text-align: center; margin-bottom: 20px; font-size: 18px; color: #FFD700;';
+        progressDiv.className = 'df-list-summary';
         progressDiv.innerHTML = `Progresso: ${progress.unlocked}/${progress.total} (${progress.percentage}%)`;
         list.appendChild(progressDiv);
         
@@ -142,7 +142,7 @@ const ui = {
         list.innerHTML = '';
         
         const totalDiv = document.createElement('div');
-        totalDiv.style.cssText = 'text-align: center; margin-bottom: 20px; font-size: 18px; color: #FFD700;';
+        totalDiv.className = 'df-list-summary';
         totalDiv.innerHTML = `💰 Moedas Disponíveis: ${gameStats.coins}<br>
                              📊 Total Investido: ${upgradeManager.getTotalInvested()} moedas`;
         list.appendChild(totalDiv);
@@ -171,66 +171,22 @@ const ui = {
     },
     
     showInstructions() {
-        const instructions = `
-🐉 DRAGON FURY - SHOOT 'EM UP COM FASES
+        const mainMenu = document.getElementById('main-menu');
+        const panel = document.getElementById('instructions-panel');
+        if (mainMenu) mainMenu.style.display = 'none';
+        if (panel) panel.style.display = 'block';
+    },
 
-🎮 CONTROLES:
-━━━━━━━━━━━━━━━━━━━━━━
-⬅️ A / ← - Mover para esquerda
-➡️ D / → - Mover para direita  
-⬆️ W / ↑ - Mover para cima
-⬇️ S / ↓ - Mover para baixo
-🔥 F / Espaço - Atirar (segurar para automático)
-⏸️ ESC - Pausar jogo
-
-🎯 OBJETIVO:
-━━━━━━━━━━━━━━━━━━━━━━
-Complete 5 fases épicas destruindo inimigos!
-• Derrote inimigos de diferentes tipos 👾
-• Colete moedas e power-ups 💰
-• Complete objetivos de cada fase 🎯
-• Derrote o boss no final de cada fase 👑
-
-🏆 SISTEMA DE FASES:
-━━━━━━━━━━━━━━━━━━━━━━
-Fase 1: Céu Sereno - Derrote 20 inimigos
-Fase 2: Tempestade Iminente - Derrote 30 inimigos
-Fase 3: Fúria Ardente - Derrote 40 inimigos
-Fase 4: Abismo Sombrio - Derrote 50 inimigos
-Fase 5: Invasão Cósmica - Derrote 60 inimigos
-
-💥 TIPOS DE INIMIGOS:
-━━━━━━━━━━━━━━━━━━━━━━
-🔴 Básico - Inimigo padrão
-🟠 Rápido - Move-se rapidamente
-⚫ Tanque - Muita vida, lento
-🟣 Atirador - Dispara projéteis
-
-⚡ POWER-UPS:
-━━━━━━━━━━━━━━━━━━━━━━
-❤️ Vida - Recupera +30 HP
-⚡ Tiro Rápido - Disparo automático ultra rápido
-🛡️ Escudo - Invulnerabilidade temporária
-💣 Bomba - Limpa todos os inimigos da tela
-
-🎖️ SISTEMA DE UPGRADES:
-━━━━━━━━━━━━━━━━━━━━━━
-🔥 Poder do Fogo - Mais dano e taxa de disparo
-❤️ Vida Máxima - Aumenta HP máximo
-⚡ Velocidade - Move-se mais rápido
-🎯 Tiro Múltiplo - Dispara vários projéteis
-🛡️ Escudo - Reduz dano recebido
-
-⚠️ DICAS ESTRATÉGICAS:
-━━━━━━━━━━━━━━━━━━━━━━
-• Cada fase fica progressivamente mais difícil!
-• Você ganha cura parcial entre fases
-• Priorize inimigos atiradores!
-• Colete moedas para upgrades poderosos
-• Bosses de fase são mais fortes que bosses normais
-• Complete todas as 5 fases para a vitória final!
-        `;
-        alert(instructions);
+    closeInstructions() {
+        const panel = document.getElementById('instructions-panel');
+        if (panel) panel.style.display = 'none';
+        if (gameData.gameState === 'menu') {
+            const mainMenu = document.getElementById('main-menu');
+            if (mainMenu) mainMenu.style.display = 'block';
+        } else if (gameData.gameState === 'paused') {
+            const pauseMenu = document.getElementById('pause-menu');
+            if (pauseMenu) pauseMenu.style.display = 'block';
+        }
     },
     
     showGameOver() {
@@ -252,7 +208,7 @@ Fase 5: Invasão Cósmica - Derrote 60 inimigos
     },
     
     hideGameOver() {
-        console.log('🔄 Escondendo tela de Game Over...');
+        debugLog('🔄 Escondendo tela de Game Over...');
         document.getElementById('game-over').style.display = 'none';
     },
     
@@ -265,7 +221,7 @@ Fase 5: Invasão Cósmica - Derrote 60 inimigos
     },
     
     showStageComplete() {
-        console.log('🎉 Mostrando tela de Stage Complete...');
+        debugLog('🎉 Mostrando tela de Stage Complete...');
         
         // 🔧 BUGFIX: usar phaseSystem.phases (fonte única de verdade, 5 fases)
         // em vez de stages[] (data.js, só tinha 5 fases e travava/crashava
@@ -386,7 +342,7 @@ Fase 5: Invasão Cósmica - Derrote 60 inimigos
     },
     
     hideStageComplete() {
-        console.log('🔄 Escondendo tela de Stage Complete...');
+        debugLog('🔄 Escondendo tela de Stage Complete...');
         document.getElementById('stage-complete').style.display = 'none';
     },
     

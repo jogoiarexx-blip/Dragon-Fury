@@ -114,8 +114,8 @@ const stages = {
         bossHealth: 1500
     },
     5: {
-        name: 'Batalha Final',
-        description: 'O confronto definitivo',
+        name: 'Invasão Cósmica',
+        description: 'Forças alienígenas atacam',
         background: {
             color1: '#220033',
             color2: '#110022',

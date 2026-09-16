@@ -84,7 +84,7 @@ class DragaoEscolta {
     
     draw() {
         if (!this.active) {
-            console.warn('⚠️ Dragão escolta não está ativo');
+            debugWarn('⚠️ Dragão escolta não está ativo');
             return;
         }
         
@@ -311,12 +311,12 @@ const escortManager = {
     init() {
         this.escorts = [];
         this.initialized = true;
-        console.log('🐉 Escort Manager Inicializado');
+        debugLog('🐉 Escort Manager Inicializado');
     },
     
     activate() {
-        console.log('🐉 Tentando ativar dragões escolta...');
-        console.log('🐉 dragon disponível:', typeof dragon !== 'undefined' && dragon !== null);
+        debugLog('🐉 Tentando ativar dragões escolta...');
+        debugLog('🐉 dragon disponível:', typeof dragon !== 'undefined' && dragon !== null);
         
         // Verificar se dragon existe
         if (typeof dragon === 'undefined' || dragon === null) {
@@ -337,7 +337,7 @@ const escortManager = {
             if (leftEscort.active && rightEscort.active) {
                 this.escorts.push(leftEscort);
                 this.escorts.push(rightEscort);
-                console.log(`✅ ${this.escorts.length} dragões escolta criados com sucesso!`);
+                debugLog(`✅ ${this.escorts.length} dragões escolta criados com sucesso!`);
                 
                 // Mostrar notificação se UI estiver disponível
                 if (typeof ui !== 'undefined' && ui.showNotification) {
@@ -358,7 +358,7 @@ const escortManager = {
         this.escorts.forEach(escort => escort.active = false);
         this.escorts = [];
         localStorage.setItem('escortsActive', 'false');
-        console.log('❌ Dragões escolta desativados');
+        debugLog('❌ Dragões escolta desativados');
     },
     
     updateAll() {
@@ -381,7 +381,7 @@ const escortManager = {
         const upgradeLevel = parseInt(localStorage.getItem('upgradeEscorts')) || 0;
         
         if (wasActive && upgradeLevel > 0) {
-            console.log('🔄 Restaurando dragões escolta...');
+            debugLog('🔄 Restaurando dragões escolta...');
             this.activate();
         }
     }
@@ -393,23 +393,23 @@ const escortManager = {
 if (typeof upgrades !== 'undefined' && upgrades.escorts) {
     // Adicionar método apply ao upgrade existente
     upgrades.escorts.apply = function() {
-        console.log('🛒 Upgrade de Escolta aplicado!');
+        debugLog('🛒 Upgrade de Escolta aplicado!');
         // Ativar os dragões escolta
         setTimeout(() => {
             if (typeof escortManager !== 'undefined') {
                 escortManager.activate();
-                console.log('✅ Escorts ativados via apply()!');
+                debugLog('✅ Escorts ativados via apply()!');
             }
         }, 100);
     };
     
     // Método alternativo
     upgrades.escorts.onActivate = function() {
-        console.log('🔥 onActivate chamado!');
+        debugLog('🔥 onActivate chamado!');
         escortManager.activate();
     };
     
-    console.log('✅ Métodos de ativação adicionados ao upgrade escorts');
+    debugLog('✅ Métodos de ativação adicionados ao upgrade escorts');
 }
 
 // ===== INICIALIZAÇÃO =====
@@ -427,4 +427,4 @@ if (typeof window !== 'undefined') {
     window.DragaoEscolta = DragaoEscolta;
 }
 
-console.log('🐉 Sistema de Dragões Escolta carregado!');
+debugLog('🐉 Sistema de Dragões Escolta carregado!');

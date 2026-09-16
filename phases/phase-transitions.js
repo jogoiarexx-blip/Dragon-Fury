@@ -32,7 +32,7 @@ const phaseTransitions = {
         this.fromPhase = fromPhaseNum;
         this.toPhase = toPhaseNum;
         
-        console.log(`🎬 Iniciando transição ${type}: Fase ${fromPhaseNum} → Fase ${toPhaseNum}`);
+        debugLog(`🎬 Iniciando transição ${type}: Fase ${fromPhaseNum} → Fase ${toPhaseNum}`);
         
         // Configurações específicas por tipo
         switch(type) {
@@ -168,7 +168,7 @@ const phaseTransitions = {
         this.flashAlpha = 0;
         this.warpIntensity = 0;
         
-        console.log(`✅ Transição concluída: Fase ${this.toPhase}`);
+        debugLog(`✅ Transição concluída: Fase ${this.toPhase}`);
         
         // Callback de conclusão se necessário
         if (this.onTransitionComplete) {

@@ -217,7 +217,7 @@ const polishSystem = {
         ctx.fillStyle='#fff';ctx.font='800 10px Arial';ctx.fillText(Math.ceil(gameStats.health)+' / '+max,28,68);
         ctx.textAlign='right';ctx.fillStyle='#ffd258';ctx.font='900 18px Arial';ctx.fillText('🪙 '+gameStats.coins,568,37);ctx.fillStyle='#e7ebf4';ctx.font='800 12px Arial';ctx.fillText(String(gameStats.score).padStart(7,'0'),568,59);
         ctx.textAlign='center';ctx.fillStyle='#7f8aa1';ctx.font='700 9px Arial';ctx.fillText('FASE '+gameData.currentStage,330,31);ctx.fillStyle='#fff';ctx.font='800 12px Arial';ctx.fillText((stage&&stage.name)||'',330,50);
-        const target=Math.max(1,gameData.stageTargetKills||1), prog=Math.min(1,gameData.enemiesKilledThisStage/target);ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(278,62,104,3);ctx.fillStyle='#ff9c28';ctx.fillRect(278,62,104*prog,3);
+        const missionProg=(typeof phaseSystem!=='undefined'&&phaseSystem.getPhaseProgress)?phaseSystem.getPhaseProgress():null, prog=missionProg?Math.min(1,(missionProg.percentage||0)/100):0;ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(278,62,104,3);ctx.fillStyle='#ff9c28';ctx.fillRect(278,62,104*prog,3);
         // rank pill
         if(typeof rankSystem!=='undefined'){const rr=rankSystem.getCurrentRank?rankSystem.getCurrentRank():'C'; const rank=(rr&&rr.letter)||rr||'C';ctx.textAlign='left';ctx.fillStyle='rgba(5,7,16,.75)';this.roundRect(ctx,12,94,88,34,9);ctx.fill();ctx.fillStyle='#ffd34a';ctx.font='900 16px Arial';ctx.fillText('RANK '+rank,25,117);}
         // active powerup

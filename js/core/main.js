@@ -7,10 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Atualizar display da fase máxima no menu
     document.getElementById('max-stage-display').textContent = gameStats.maxStageReached;
     
-    console.log('🐉 Dragon Fury carregado com sucesso!');
-    console.log('📊 Estatísticas:', gameStats);
-    console.log('⚡ Upgrades:', upgrades);
-    console.log('🎮 Fase Máxima:', gameStats.maxStageReached);
+    debugLog('🐉 Dragon Fury carregado com sucesso!');
+    debugLog('📊 Estatísticas:', gameStats);
+    debugLog('⚡ Upgrades:', upgrades);
+    debugLog('🎮 Fase Máxima:', gameStats.maxStageReached);
 });
 
 // Prevenir scroll da página com as teclas de seta
@@ -39,7 +39,7 @@ window.dragonGame = {
         localStorage.setItem('dragonCoins', gameStats.coins);
         localStorage.setItem('dragonTotalCoins', gameStats.totalCoins);
         ui.updateHUD();
-        console.log(`✅ Adicionadas ${amount} moedas`);
+        debugLog(`✅ Adicionadas ${amount} moedas`);
     },
     
     unlockAllAchievements() {
@@ -48,7 +48,7 @@ window.dragonGame = {
                 achievementManager.unlock(ach);
             }
         });
-        console.log('✅ Todas as conquistas desbloqueadas');
+        debugLog('✅ Todas as conquistas desbloqueadas');
     },
     
     maxAllUpgrades() {
@@ -59,7 +59,7 @@ window.dragonGame = {
                                 upgrade.level);
         });
         ui.renderUpgrades();
-        console.log('✅ Todos os upgrades maximizados');
+        debugLog('✅ Todos os upgrades maximizados');
     },
     
     setStage(stage) {
@@ -68,9 +68,9 @@ window.dragonGame = {
             gameStats.maxStageReached = Math.max(gameStats.maxStageReached, stage);
             localStorage.setItem('dragonMaxStage', gameStats.maxStageReached);
             document.getElementById('max-stage-display').textContent = gameStats.maxStageReached;
-            console.log(`✅ Fase definida para: ${stage}`);
+            debugLog(`✅ Fase definida para: ${stage}`);
         } else {
-            console.log('❌ Fase inválida (1-5)');
+            debugLog('❌ Fase inválida (1-5)');
         }
     },
     
@@ -78,7 +78,7 @@ window.dragonGame = {
         if (confirm('⚠️ Tem certeza que deseja resetar todo o progresso?')) {
             localStorage.clear();
             location.reload();
-            console.log('✅ Progresso resetado');
+            debugLog('✅ Progresso resetado');
         }
     },
     
@@ -101,15 +101,15 @@ window.dragonGame = {
     }
 };
 
-console.log('%c🐉 DRAGON FURY 🐉', 'font-size: 24px; color: #FF6B35; font-weight: bold;');
-console.log('%cSistema de Fases Implementado!', 'font-size: 18px; color: #00FF00;');
-console.log('%cComandos de Debug:', 'font-size: 16px; color: #FFD700;');
-console.log('dragonGame.addCoins(amount) - Adicionar moedas');
-console.log('dragonGame.unlockAllAchievements() - Desbloquear todas conquistas');
-console.log('dragonGame.maxAllUpgrades() - Maximizar todos upgrades');
-console.log('dragonGame.setStage(1-5) - Definir fase atual');
-console.log('dragonGame.resetProgress() - Resetar progresso');
-console.log('dragonGame.getStats() - Ver estatísticas');
-console.log('%cBom jogo! 🎮🔥', 'font-size: 14px; color: #00FF00;');
+debugLog('%c🐉 DRAGON FURY 🐉', 'font-size: 24px; color: #FF6B35; font-weight: bold;');
+debugLog('%cSistema de Fases Implementado!', 'font-size: 18px; color: #00FF00;');
+debugLog('%cComandos de Debug:', 'font-size: 16px; color: #FFD700;');
+debugLog('dragonGame.addCoins(amount) - Adicionar moedas');
+debugLog('dragonGame.unlockAllAchievements() - Desbloquear todas conquistas');
+debugLog('dragonGame.maxAllUpgrades() - Maximizar todos upgrades');
+debugLog('dragonGame.setStage(1-5) - Definir fase atual');
+debugLog('dragonGame.resetProgress() - Resetar progresso');
+debugLog('dragonGame.getStats() - Ver estatísticas');
+debugLog('%cBom jogo! 🎮🔥', 'font-size: 14px; color: #00FF00;');
 
 }

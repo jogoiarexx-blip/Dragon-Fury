@@ -1069,4 +1069,4 @@ if (typeof window !== 'undefined') {
     };
 }
 
-console.log('✨ Sistema de Inimigos V2 carregado com sucesso!');
+debugLog('✨ Sistema de Inimigos V2 carregado com sucesso!');

@@ -31,13 +31,13 @@ const upgradeManager = {
             
             // ⭐ ATIVAÇÃO ESPECIAL PARA ESCORTS
             if (upgradeKey === 'escorts') {
-                console.log('🐉 Ativando dragões escolta após compra!');
+                debugLog('🐉 Ativando dragões escolta após compra!');
                 
                 // Dar um pequeno delay para garantir que tudo está carregado
                 setTimeout(() => {
                     if (typeof escortManager !== 'undefined') {
                         escortManager.activate();
-                        console.log('✅ Escorts ativados com sucesso!');
+                        debugLog('✅ Escorts ativados com sucesso!');
                     } else {
                         console.error('❌ escortManager não encontrado!');
                     }
@@ -46,12 +46,12 @@ const upgradeManager = {
             
             // ⭐ CHAMAR MÉTODOS DE ATIVAÇÃO SE EXISTIREM
             if (typeof upgrade.apply === 'function') {
-                console.log(`📞 Chamando apply() para ${upgradeKey}`);
+                debugLog(`📞 Chamando apply() para ${upgradeKey}`);
                 upgrade.apply();
             }
             
             if (typeof upgrade.onActivate === 'function') {
-                console.log(`📞 Chamando onActivate() para ${upgradeKey}`);
+                debugLog(`📞 Chamando onActivate() para ${upgradeKey}`);
                 upgrade.onActivate();
             }
             
