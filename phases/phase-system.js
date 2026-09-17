@@ -30,7 +30,7 @@ const phaseSystem = {
                 type: 'AncientDragonBoss',
                 spawnCondition: 'kills' // Aparece após kills objetivo
             },
-            assets: ['assets/bosses/ancient-dragon-boss.webp'],
+            assets: ['assets/bosses/ancient-dragon-boss.webp', 'assets/enemies/phase1/basic-wyvern.webp', 'assets/enemies/phase1/zigzag-serpent.webp', 'assets/enemies/phase1/vanguard-elite.webp'],
             
             // Música e efeitos
             ambience: {
@@ -62,7 +62,7 @@ const phaseSystem = {
                 type: 'AncientDragonBoss',
                 spawnCondition: 'kills'
             },
-            assets: ['assets/bosses/ancient-dragon-boss.webp'],
+            assets: ['assets/bosses/ancient-dragon-boss.webp', 'assets/enemies/phase1/basic-wyvern.webp', 'assets/enemies/phase1/zigzag-serpent.webp', 'assets/enemies/phase2/tank-fortress.webp', 'assets/enemies/phase2/sniper-arcane.webp'],
             
             ambience: {
                 starDensity: 80,
@@ -94,6 +94,7 @@ const phaseSystem = {
                 type: 'SegmentedSerpentBoss',
                 spawnCondition: 'kills'
             },
+            assets: ['assets/enemies/phase1/basic-wyvern.webp', 'assets/enemies/phase1/zigzag-serpent.webp', 'assets/enemies/phase2/tank-fortress.webp', 'assets/enemies/phase2/sniper-arcane.webp'],
             
             ambience: {
                 starDensity: 60,
@@ -125,6 +126,7 @@ const phaseSystem = {
                 type: 'SegmentedSerpentBoss',
                 spawnCondition: 'kills'
             },
+            assets: ['assets/enemies/phase1/zigzag-serpent.webp', 'assets/enemies/phase2/tank-fortress.webp', 'assets/enemies/phase2/sniper-arcane.webp'],
             
             ambience: {
                 starDensity: 40,
@@ -156,6 +158,7 @@ const phaseSystem = {
                 type: 'ChaosGeometryBoss',
                 spawnCondition: 'kills'
             },
+            assets: ['assets/enemies/phase2/tank-fortress.webp', 'assets/enemies/phase2/sniper-arcane.webp'],
             
             ambience: {
                 starDensity: 120,

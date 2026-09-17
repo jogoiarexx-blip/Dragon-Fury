@@ -21,8 +21,7 @@ window.addEventListener('keydown', (e) => {
 });
 
 // Debug protegido: ative com ?debug=1 apenas durante desenvolvimento.
-const DEBUG_MODE = new URLSearchParams(location.search).get('debug') === '1';
-if (DEBUG_MODE) {
+if (window.DEBUG_MODE) {
 
 window.dragonGame = {
     gameData,

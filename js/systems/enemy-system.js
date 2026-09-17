@@ -1,5 +1,114 @@
 // ===== SISTEMA DE INIMIGOS MELHORADO - DRAGON FURY V2 =====
 
+
+// Sprites dos inimigos (fase 1)
+const enemySpriteAssets = {
+    basicPhase1: {
+        src: 'assets/enemies/phase1/basic-wyvern.webp',
+        image: null,
+        loaded: false,
+        loading: false,
+        error: false,
+        cols: 4,
+        rows: 4,
+        cellWidth: 0,
+        cellHeight: 0
+    },
+    zigzagPhase1: {
+        src: 'assets/enemies/phase1/zigzag-serpent.webp',
+        image: null,
+        loaded: false,
+        loading: false,
+        error: false,
+        cols: 4,
+        rows: 4,
+        cellWidth: 0,
+        cellHeight: 0
+    },
+    vanguardElite: {
+        src: 'assets/enemies/phase1/vanguard-elite.webp',
+        image: null,
+        loaded: false,
+        loading: false,
+        error: false,
+        cols: 4,
+        rows: 4,
+        cellWidth: 0,
+        cellHeight: 0
+    },
+    tankFortress: {
+        src: 'assets/enemies/phase2/tank-fortress.webp',
+        image: null,
+        loaded: false,
+        loading: false,
+        error: false,
+        cols: 4,
+        rows: 4,
+        cellWidth: 0,
+        cellHeight: 0
+    },
+    sniperArcane: {
+        src: 'assets/enemies/phase2/sniper-arcane.webp',
+        image: null,
+        loaded: false,
+        loading: false,
+        error: false,
+        cols: 4,
+        rows: 4,
+        cellWidth: 0,
+        cellHeight: 0
+    }
+};
+
+function ensureEnemySpriteLoaded(key) {
+    const asset = enemySpriteAssets[key];
+    if (!asset || asset.loaded || asset.loading) return asset;
+    asset.loading = true;
+    const img = new Image();
+    img.onload = () => {
+        asset.image = img;
+        asset.loaded = true;
+        asset.loading = false;
+        asset.error = false;
+        asset.cellWidth = img.width / asset.cols;
+        asset.cellHeight = img.height / asset.rows;
+    };
+    img.onerror = () => {
+        asset.error = true;
+        asset.loading = false;
+    };
+    img.src = asset.src;
+    asset.image = img;
+    return asset;
+}
+
+function drawSpriteFrame(ctx, asset, frameIndex, dx, dy, dw, dh, options = {}) {
+    if (!asset || !asset.loaded || !asset.image) return false;
+    const totalFrames = asset.cols * asset.rows;
+    const frame = Math.max(0, Math.min(totalFrames - 1, frameIndex | 0));
+    const sx = (frame % asset.cols) * asset.cellWidth;
+    const sy = Math.floor(frame / asset.cols) * asset.cellHeight;
+
+    ctx.save();
+    if (options.shadowColor) {
+        ctx.shadowBlur = options.shadowBlur ?? 14;
+        ctx.shadowColor = options.shadowColor;
+    }
+    if (typeof options.alpha === 'number') {
+        ctx.globalAlpha = options.alpha;
+    }
+    ctx.drawImage(asset.image, sx, sy, asset.cellWidth, asset.cellHeight, dx, dy, dw, dh);
+    ctx.restore();
+    return true;
+}
+
+// Pré-carrega em background para a primeira fase não travar na estreia dos inimigos.
+ensureEnemySpriteLoaded('basicPhase1');
+ensureEnemySpriteLoaded('zigzagPhase1');
+ensureEnemySpriteLoaded('vanguardElite');
+ensureEnemySpriteLoaded('tankFortress');
+ensureEnemySpriteLoaded('sniperArcane');
+
 // Classe base melhorada para todos os inimigos
 class BaseEnemy {
     constructor(x, y, config) {
@@ -177,11 +286,12 @@ class BaseEnemy {
 }
 
 // 1. INIMIGO BÁSICO - GUERREIRO VOADOR
+
 class BasicEnemy extends BaseEnemy {
     constructor(x, y, config = {}) {
         super(x, y, {
-            width: 40,
-            height: 40,
+            width: 52,
+            height: 52,
             health: 50,
             speed: 2,
             color: '#8B0000',
@@ -189,23 +299,34 @@ class BasicEnemy extends BaseEnemy {
             type: 'basic',
             ...config
         });
+        this.spriteAssetKey = 'basicPhase1';
+        this.eliteSpriteAssetKey = 'vanguardElite';
+        this.spriteScale = 1.3;
+        ensureEnemySpriteLoaded(this.spriteAssetKey);
+        ensureEnemySpriteLoaded(this.eliteSpriteAssetKey);
     }
-    
-    draw(ctx) {
+
+    getCurrentSpriteFrame() {
+        if (this.hitFlash > 0) return this.missionElite ? 11 : 9;
+        if (this.missionElite) {
+            if (this.animationFrame % 150 > 110 && this.animationFrame % 150 < 132) return 7;
+            const flyFrames = [0, 1, 2, 3];
+            return flyFrames[Math.floor(this.animationFrame / 7) % flyFrames.length];
+        }
+        const flyFrames = [0, 1, 2, 3];
+        return flyFrames[Math.floor(this.animationFrame / 7) % flyFrames.length];
+    }
+
+    drawFallback(ctx) {
         const centerX = this.x + this.width / 2;
         const centerY = this.y + this.height / 2;
         const pulse = Math.sin(this.animationFrame * 0.1) * 2;
-        
         ctx.save();
-        
-        // Flash ao tomar dano
         if (this.hitFlash > 0) {
             ctx.globalAlpha = 0.7;
             ctx.shadowBlur = 20;
             ctx.shadowColor = '#FFFFFF';
         }
-        
-        // Asas (🔧 NOVO: pipa de 4 pontas em vez de triângulo simples — mais facetas)
         ctx.fillStyle = '#A52A2A';
         ctx.beginPath();
         ctx.moveTo(centerX - 15, centerY);
@@ -214,7 +335,6 @@ class BasicEnemy extends BaseEnemy {
         ctx.lineTo(centerX - 20 - pulse, centerY + 10);
         ctx.closePath();
         ctx.fill();
-        
         ctx.beginPath();
         ctx.moveTo(centerX + 15, centerY);
         ctx.lineTo(centerX + 25 + pulse, centerY - 10);
@@ -222,41 +342,65 @@ class BasicEnemy extends BaseEnemy {
         ctx.lineTo(centerX + 20 + pulse, centerY + 10);
         ctx.closePath();
         ctx.fill();
-        
-        // Corpo (🔧 MELHORADO: gradiente radial + contorno em vez de cor chapada)
         ctx.shadowBlur = 10;
         ctx.shadowColor = this.color;
         fillPolygonGradient(ctx, centerX, centerY, 17, 7, '#FF6B47', this.color, -Math.PI / 2);
         strokePolygon(ctx, centerX, centerY, 17, 7, 'rgba(0,0,0,0.4)', 1.5, -Math.PI / 2);
-        
-        // 🔧 NOVO: anel externo facetado (contorno decagonal) para reforçar o visual poligonal
         ctx.strokeStyle = 'rgba(255, 69, 0, 0.6)';
         ctx.lineWidth = 1.5;
         drawPolygonPath(ctx, centerX, centerY, 20, 10, this.animationFrame * 0.02);
         ctx.stroke();
-        
-        // Detalhes (🔧 NOVO: pentágono interno)
         ctx.fillStyle = '#FF4500';
         fillPolygon(ctx, centerX, centerY + 5, 11, 5, -Math.PI / 2);
-        
-        // Olhos (🔧 NOVO: losangos em vez de círculos)
         ctx.fillStyle = '#FFD700';
         ctx.shadowBlur = 5;
         ctx.shadowColor = '#FFD700';
         fillDiamond(ctx, centerX - 5, centerY - 5, 3);
         fillDiamond(ctx, centerX + 5, centerY - 5, 3);
-        
         ctx.restore();
+    }
+
+    draw(ctx) {
+        const assetKey = this.missionElite ? this.eliteSpriteAssetKey : this.spriteAssetKey;
+        ensureEnemySpriteLoaded(assetKey);
+        const asset = enemySpriteAssets[assetKey];
+        const frame = this.getCurrentSpriteFrame();
+        const bob = Math.sin(this.animationFrame * 0.12) * 2;
+        const scale = this.missionElite ? 1.36 : this.spriteScale;
+        const drawW = this.width * scale;
+        const drawH = this.height * scale;
+        const drawX = this.x - (drawW - this.width) / 2;
+        const drawY = this.y - (drawH - this.height) / 2 + bob;
+
+        const drawn = drawSpriteFrame(ctx, asset, frame, drawX, drawY, drawW, drawH, {
+            shadowColor: this.hitFlash > 0 ? '#FFFFFF' : (this.missionElite ? '#FFC14D' : '#FF5A1F'),
+            shadowBlur: this.hitFlash > 0 ? 18 : (this.missionElite ? 16 : 10)
+        });
+
+        if (this.missionElite && drawn) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 204, 90, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(this.x + this.width / 2, this.y + this.height / 2, Math.max(this.width, this.height) * 0.42, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        if (!drawn) {
+            this.drawFallback(ctx);
+        }
         this.drawHealthBar(ctx);
     }
 }
 
 // 2. INIMIGO ZIGZAG - CAÇADOR ÁGIL
+
 class ZigZagEnemy extends BaseEnemy {
     constructor(x, y) {
         super(x, y, {
-            width: 35,
-            height: 35,
+            width: 52,
+            height: 52,
             health: 40,
             speed: 3,
             color: '#FF1493',
@@ -266,37 +410,38 @@ class ZigZagEnemy extends BaseEnemy {
         this.direction = Math.random() < 0.5 ? -1 : 1;
         this.moveTimer = 0;
         this.trail = [];
+        this.spriteAssetKey = 'zigzagPhase1';
+        this.spriteScale = 1.32;
+        ensureEnemySpriteLoaded(this.spriteAssetKey);
     }
-    
+
     update() {
         this.y += this.speed;
         this.animationFrame++;
         if (this.hitFlash > 0) this.hitFlash--;
-        
-        // Movimento em zigzag
         this.moveTimer++;
         if (this.moveTimer % 30 === 0) {
             this.direction *= -1;
         }
         this.x += this.direction * 3;
-        
-        // Limites laterais
         if (this.x < 0 || this.x > gameData.canvas.width - this.width) {
             this.direction *= -1;
         }
-        
-        // Trilha
         this.trail.push({ x: this.x + this.width / 2, y: this.y + this.height / 2 });
         if (this.trail.length > 10) this.trail.shift();
     }
-    
-    draw(ctx) {
+
+    getCurrentSpriteFrame() {
+        if (this.hitFlash > 0) return 11;
+        const idx = Math.floor(this.animationFrame / 6) % 2;
+        if (this.direction < 0) return [4, 5][idx];
+        return [6, 7][idx];
+    }
+
+    drawFallback(ctx) {
         const centerX = this.x + this.width / 2;
         const centerY = this.y + this.height / 2;
-        
         ctx.save();
-        
-        // Desenhar trilha
         ctx.strokeStyle = 'rgba(255, 20, 147, 0.3)';
         ctx.lineWidth = 3;
         ctx.beginPath();
@@ -305,20 +450,14 @@ class ZigZagEnemy extends BaseEnemy {
             else ctx.lineTo(point.x, point.y);
         });
         ctx.stroke();
-        
-        // Flash ao tomar dano
         if (this.hitFlash > 0) {
             ctx.globalAlpha = 0.7;
             ctx.shadowBlur = 20;
             ctx.shadowColor = '#FFFFFF';
         }
-        
-        // Corpo (🔧 NOVO: pentágono em forma de flecha em vez de triângulo simples — mais uma face)
         const rotation = Math.sin(this.animationFrame * 0.2);
         ctx.translate(centerX, centerY);
         ctx.rotate(rotation * 0.3);
-        
-        ctx.fillStyle = this.color;
         ctx.shadowBlur = 15;
         ctx.shadowColor = this.color;
         ctx.beginPath();
@@ -328,7 +467,6 @@ class ZigZagEnemy extends BaseEnemy {
         ctx.lineTo(8, 15);
         ctx.lineTo(15, 8);
         ctx.closePath();
-        // 🔧 MELHORADO: gradiente linear no corpo em flecha em vez de cor chapada
         const zzGradient = ctx.createLinearGradient(0, -20, 0, 15);
         zzGradient.addColorStop(0, '#FFB6C1');
         zzGradient.addColorStop(1, this.color);
@@ -337,14 +475,10 @@ class ZigZagEnemy extends BaseEnemy {
         ctx.strokeStyle = 'rgba(0,0,0,0.4)';
         ctx.lineWidth = 1.5;
         ctx.stroke();
-        
-        // Núcleo (🔧 NOVO: hexágono em vez de círculo)
         ctx.fillStyle = '#FFD700';
         ctx.shadowBlur = 10;
         ctx.shadowColor = '#FFD700';
         fillPolygon(ctx, 0, 0, 6, 6, this.animationFrame * 0.05);
-        
-        // Lâminas (🔧 NOVO: losangos facetados em vez de retângulos lisos)
         for (let i = 0; i < 3; i++) {
             const angle = (Math.PI * 2 / 3) * i + this.animationFrame * 0.1;
             ctx.save();
@@ -353,18 +487,48 @@ class ZigZagEnemy extends BaseEnemy {
             fillPolygon(ctx, 0, -10, 6, 4, 0);
             ctx.restore();
         }
-        
         ctx.restore();
+    }
+
+    draw(ctx) {
+        ensureEnemySpriteLoaded(this.spriteAssetKey);
+        const asset = enemySpriteAssets[this.spriteAssetKey];
+        const frame = this.getCurrentSpriteFrame();
+        const drawW = this.width * this.spriteScale;
+        const drawH = this.height * this.spriteScale;
+        const drawX = this.x - (drawW - this.width) / 2;
+        const drawY = this.y - (drawH - this.height) / 2;
+
+        ctx.save();
+        ctx.strokeStyle = this.hitFlash > 0 ? 'rgba(255,255,255,0.35)' : 'rgba(255, 120, 40, 0.22)';
+        ctx.lineWidth = this.hitFlash > 0 ? 4 : 3;
+        ctx.beginPath();
+        this.trail.forEach((point, i) => {
+            if (i === 0) ctx.moveTo(point.x, point.y);
+            else ctx.lineTo(point.x, point.y);
+        });
+        ctx.stroke();
+        ctx.restore();
+
+        const drawn = drawSpriteFrame(ctx, asset, frame, drawX, drawY, drawW, drawH, {
+            shadowColor: this.hitFlash > 0 ? '#FFFFFF' : '#FF6A33',
+            shadowBlur: this.hitFlash > 0 ? 16 : 10
+        });
+
+        if (!drawn) {
+            this.drawFallback(ctx);
+        }
         this.drawHealthBar(ctx);
     }
 }
 
 // 3. INIMIGO TANQUE - FORTALEZA VOADORA
+
 class TankEnemy extends BaseEnemy {
     constructor(x, y) {
         super(x, y, {
-            width: 55,
-            height: 55,
+            width: 64,
+            height: 64,
             health: 200,
             speed: 1,
             color: '#4B4B4B',
@@ -373,15 +537,15 @@ class TankEnemy extends BaseEnemy {
             type: 'tank'
         });
         this.armor = 3;
+        this.spriteAssetKey = 'tankFortress';
+        this.spriteScale = 1.34;
+        ensureEnemySpriteLoaded(this.spriteAssetKey);
     }
-    
+
     takeDamage(damage) {
-        // Reduzir dano pela armadura
         const reducedDamage = Math.max(1, damage - this.armor);
         this.health -= reducedDamage;
         this.hitFlash = 10;
-        
-        // Partículas de impacto
         for (let i = 0; i < 3; i++) {
             gameEntities.particles.push({
                 x: this.x + Math.random() * this.width,
@@ -393,28 +557,29 @@ class TankEnemy extends BaseEnemy {
                 life: 15
             });
         }
-        
         if (this.health <= 0) {
             this.destroy();
             return true;
         }
         return false;
     }
-    
-    draw(ctx) {
+
+    getCurrentSpriteFrame() {
+        if (this.hitFlash > 0) return 11;
+        const cycle = Math.floor(this.animationFrame / 10) % 4;
+        if (this.animationFrame % 180 > 118 && this.animationFrame % 180 < 150) return 10; // firing
+        return [0,1,2,3][cycle];
+    }
+
+    drawFallback(ctx) {
         const centerX = this.x + this.width / 2;
         const centerY = this.y + this.height / 2;
-        
         ctx.save();
-        
-        // Flash ao tomar dano
         if (this.hitFlash > 0) {
             ctx.globalAlpha = 0.5;
             ctx.shadowBlur = 25;
             ctx.shadowColor = '#FFA500';
         }
-        
-        // Corpo principal blindado (🔧 NOVO: casco octogonal chanfrado em vez de retângulo reto)
         ctx.shadowBlur = 10;
         ctx.shadowColor = '#000';
         const bevel = 10;
@@ -428,7 +593,6 @@ class TankEnemy extends BaseEnemy {
         ctx.lineTo(this.x, this.y + this.height - bevel);
         ctx.lineTo(this.x, this.y + bevel);
         ctx.closePath();
-        // 🔧 MELHORADO: gradiente diagonal no casco (efeito de luz metálica) em vez de cor chapada
         const tankGradient = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y + this.height);
         tankGradient.addColorStop(0, '#8FA68E');
         tankGradient.addColorStop(0.5, this.color);
@@ -438,54 +602,53 @@ class TankEnemy extends BaseEnemy {
         ctx.strokeStyle = 'rgba(0,0,0,0.5)';
         ctx.lineWidth = 2;
         ctx.stroke();
-        
-        // Placas de armadura (🔧 NOVO: octógonos chanfrados em vez de quadrados)
         ctx.fillStyle = '#696969';
         ctx.strokeStyle = '#2F4F4F';
         ctx.lineWidth = 2;
-        const armorCenters = [
-            [this.x + 12, this.y + 12],
-            [this.x + this.width - 12, this.y + 12],
-            [this.x + 12, this.y + this.height - 12],
-            [this.x + this.width - 12, this.y + this.height - 12]
-        ];
-        armorCenters.forEach(([px, py]) => {
-            drawPolygonPath(ctx, px, py, 10, 8, Math.PI / 8);
-            ctx.fill();
-            ctx.stroke();
-        });
-        
-        // Torre central (🔧 NOVO: octógono blindado em vez de círculo)
+        const armorCenters = [[this.x + 12, this.y + 12],[this.x + this.width - 12, this.y + 12],[this.x + 12, this.y + this.height - 12],[this.x + this.width - 12, this.y + this.height - 12]];
+        armorCenters.forEach(([px, py]) => { drawPolygonPath(ctx, px, py, 10, 8, Math.PI / 8); ctx.fill(); ctx.stroke(); });
         ctx.fillStyle = '#363636';
         drawPolygonPath(ctx, centerX, centerY, 12, 8);
         ctx.fill();
         ctx.strokeStyle = '#1C1C1C';
         ctx.lineWidth = 2;
         ctx.stroke();
-        
-        // Canhão
         ctx.fillStyle = '#2F4F4F';
         ctx.fillRect(centerX - 3, centerY - 18, 6, 20);
-        
-        // Luzes de alerta (🔧 NOVO: losangos em vez de círculos)
         const lightColor = Math.floor(this.animationFrame / 30) % 2 === 0 ? '#FF0000' : '#8B0000';
         ctx.fillStyle = lightColor;
         ctx.shadowBlur = 8;
         ctx.shadowColor = lightColor;
         fillDiamond(ctx, centerX - 15, centerY - 15, 3);
         fillDiamond(ctx, centerX + 15, centerY - 15, 3);
-        
         ctx.restore();
+    }
+
+    draw(ctx) {
+        ensureEnemySpriteLoaded(this.spriteAssetKey);
+        const asset = enemySpriteAssets[this.spriteAssetKey];
+        const frame = this.getCurrentSpriteFrame();
+        const bob = Math.sin(this.animationFrame * 0.08) * 1.5;
+        const drawW = this.width * this.spriteScale;
+        const drawH = this.height * this.spriteScale;
+        const drawX = this.x - (drawW - this.width) / 2;
+        const drawY = this.y - (drawH - this.height) / 2 + bob;
+        const drawn = drawSpriteFrame(ctx, asset, frame, drawX, drawY, drawW, drawH, {
+            shadowColor: this.hitFlash > 0 ? '#FFFFFF' : '#FF7A33',
+            shadowBlur: this.hitFlash > 0 ? 18 : 12
+        });
+        if (!drawn) this.drawFallback(ctx);
         this.drawHealthBar(ctx);
     }
 }
 
 // 4. INIMIGO SNIPER - ATIRADOR DE ELITE
+
 class SniperEnemy extends BaseEnemy {
     constructor(x, y) {
         super(x, y, {
-            width: 32,
-            height: 32,
+            width: 48,
+            height: 48,
             health: 35,
             speed: 1.5,
             color: '#9370DB',
@@ -497,17 +660,18 @@ class SniperEnemy extends BaseEnemy {
         this.charging = false;
         this.chargeTime = 0;
         this.targetLock = null;
+        this.spriteAssetKey = 'sniperArcane';
+        this.spriteScale = 1.3;
+        ensureEnemySpriteLoaded(this.spriteAssetKey);
     }
-    
+
     update() {
         super.update();
         this.shootTimer++;
-        
         if (this.shootTimer > this.fireRate - 60 && !this.charging) {
             this.charging = true;
             this.chargeTime = 0;
         }
-        
         if (this.charging) {
             this.chargeTime++;
             if (this.chargeTime >= 60) {
@@ -517,13 +681,11 @@ class SniperEnemy extends BaseEnemy {
             }
         }
     }
-    
+
     shoot() {
-        // Laser preciso
         const dx = dragon.x - this.x;
         const dy = dragon.y - this.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        
         gameEntities.fireballs.push({
             x: this.x + this.width / 2 - 3,
             y: this.y + this.height,
@@ -536,8 +698,6 @@ class SniperEnemy extends BaseEnemy {
             vy: (dy / distance) * 6,
             color: '#9370DB'
         });
-        
-        // Efeito de disparo
         for (let i = 0; i < 8; i++) {
             gameEntities.particles.push({
                 x: this.x + this.width / 2,
@@ -550,49 +710,48 @@ class SniperEnemy extends BaseEnemy {
             });
         }
     }
-    
-    draw(ctx) {
+
+    getCurrentSpriteFrame() {
+        if (this.hitFlash > 0) return 12;
+        if (this.charging) {
+            const ratio = Math.min(0.999, this.chargeTime / 60);
+            if (ratio < 0.33) return 8;
+            if (ratio < 0.66) return 9;
+            return 10;
+        }
+        if (this.shootTimer < 10) return 11; // recoil pós tiro
+        const idleFrames = [0, 1, 2, 3];
+        return idleFrames[Math.floor(this.animationFrame / 8) % idleFrames.length];
+    }
+
+    drawFallback(ctx) {
         const centerX = this.x + this.width / 2;
         const centerY = this.y + this.height / 2;
-        
         ctx.save();
-        
-        // Efeito de carregamento
         if (this.charging) {
             const chargePercent = this.chargeTime / 60;
             ctx.strokeStyle = `rgba(147, 112, 219, ${chargePercent})`;
             ctx.lineWidth = 3;
             ctx.shadowBlur = 15 * chargePercent;
             ctx.shadowColor = '#9370DB';
-            // 🔧 NOVO: anel de mira em dodecágono facetado em vez de círculo
             drawPolygonPath(ctx, centerX, centerY, 20 + chargePercent * 5, 12, this.animationFrame * 0.04);
             ctx.stroke();
         }
-        
-        // Flash ao tomar dano
         if (this.hitFlash > 0) {
             ctx.globalAlpha = 0.7;
             ctx.shadowBlur = 20;
             ctx.shadowColor = '#FFFFFF';
         }
-        
-        // Corpo hexagonal (🔧 MELHORADO: usa o helper de polígonos + gradiente + contorno)
         ctx.shadowBlur = 12;
         ctx.shadowColor = this.color;
         fillPolygonGradient(ctx, centerX, centerY, 16, 6, '#C9A0FF', this.color);
         strokePolygon(ctx, centerX, centerY, 16, 6, 'rgba(0,0,0,0.4)', 1.5);
-        
-        // Núcleo (🔧 NOVO: pentágono em vez de círculo)
         ctx.fillStyle = '#BA55D3';
         fillPolygon(ctx, centerX, centerY, 8, 5, -Math.PI / 2);
-        
-        // 🔧 NOVO: anel externo facetado (dodecágono) para reforçar o corpo cristalino
         ctx.strokeStyle = 'rgba(147, 112, 219, 0.5)';
         ctx.lineWidth = 1.5;
         drawPolygonPath(ctx, centerX, centerY, 20, 12, -this.animationFrame * 0.02);
         ctx.stroke();
-        
-        // Mira laser
         ctx.strokeStyle = '#FF0000';
         ctx.lineWidth = 1;
         ctx.setLineDash([2, 2]);
@@ -601,8 +760,6 @@ class SniperEnemy extends BaseEnemy {
         ctx.lineTo(dragon.x + dragon.width / 2, dragon.y + dragon.height / 2);
         ctx.stroke();
         ctx.setLineDash([]);
-        
-        // Cristais (🔧 NOVO: losangos facetados em vez de pontinhos redondos)
         for (let i = 0; i < 3; i++) {
             const angle = (Math.PI * 2 / 3) * i + this.animationFrame * 0.05;
             const x = centerX + Math.cos(angle) * 10;
@@ -612,8 +769,49 @@ class SniperEnemy extends BaseEnemy {
             ctx.shadowColor = '#FFD700';
             fillDiamond(ctx, x, y, 3, angle);
         }
-        
         ctx.restore();
+    }
+
+    draw(ctx) {
+        ensureEnemySpriteLoaded(this.spriteAssetKey);
+        const asset = enemySpriteAssets[this.spriteAssetKey];
+        const frame = this.getCurrentSpriteFrame();
+        const bob = Math.sin(this.animationFrame * 0.1) * 1.5;
+        const drawW = this.width * this.spriteScale;
+        const drawH = this.height * this.spriteScale;
+        const drawX = this.x - (drawW - this.width) / 2;
+        const drawY = this.y - (drawH - this.height) / 2 + bob;
+
+        if (this.charging) {
+            const chargePercent = this.chargeTime / 60;
+            ctx.save();
+            ctx.strokeStyle = `rgba(187, 85, 211, ${0.3 + chargePercent * 0.7})`;
+            ctx.lineWidth = 2.5;
+            ctx.shadowBlur = 14 * chargePercent;
+            ctx.shadowColor = '#BA55D3';
+            drawPolygonPath(ctx, this.x + this.width / 2, this.y + this.height / 2, 22 + chargePercent * 5, 12, this.animationFrame * 0.05);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        const drawn = drawSpriteFrame(ctx, asset, frame, drawX, drawY, drawW, drawH, {
+            shadowColor: this.hitFlash > 0 ? '#FFFFFF' : '#B95CFF',
+            shadowBlur: this.hitFlash > 0 ? 18 : 12
+        });
+        if (drawn) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 60, 60, 0.9)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(this.x + this.width / 2, this.y + this.height / 2);
+            ctx.lineTo(dragon.x + dragon.width / 2, dragon.y + dragon.height / 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+        } else {
+            this.drawFallback(ctx);
+        }
         this.drawHealthBar(ctx);
     }
 }
