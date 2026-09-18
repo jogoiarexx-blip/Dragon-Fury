@@ -1,5 +1,58 @@
 // ===== CONTROLE DO JOGADOR (DRAGÃO) - VERSÃO MELHORADA =====
 
+const playerSpriteAsset = {
+    src: 'assets/player/fire-dragon-player.webp',
+    image: null,
+    loaded: false,
+    loading: false,
+    error: false,
+    cols: 4,
+    rows: 4,
+    cellWidth: 0,
+    cellHeight: 0
+};
+
+function ensurePlayerSpriteLoaded() {
+    if (playerSpriteAsset.loaded || playerSpriteAsset.loading) return playerSpriteAsset;
+    playerSpriteAsset.loading = true;
+    const img = new Image();
+    img.onload = () => {
+        playerSpriteAsset.image = img;
+        playerSpriteAsset.loaded = true;
+        playerSpriteAsset.loading = false;
+        playerSpriteAsset.error = false;
+        playerSpriteAsset.cellWidth = img.width / playerSpriteAsset.cols;
+        playerSpriteAsset.cellHeight = img.height / playerSpriteAsset.rows;
+    };
+    img.onerror = () => {
+        playerSpriteAsset.error = true;
+        playerSpriteAsset.loading = false;
+    };
+    img.src = playerSpriteAsset.src;
+    playerSpriteAsset.image = img;
+    return playerSpriteAsset;
+}
+
+function drawPlayerSpriteFrame(ctx, frameIndex, dx, dy, dw, dh, options = {}) {
+    ensurePlayerSpriteLoaded();
+    if (!playerSpriteAsset.loaded || !playerSpriteAsset.image) return false;
+    const total = playerSpriteAsset.cols * playerSpriteAsset.rows;
+    const frame = Math.max(0, Math.min(total - 1, frameIndex | 0));
+    const sx = (frame % playerSpriteAsset.cols) * playerSpriteAsset.cellWidth;
+    const sy = Math.floor(frame / playerSpriteAsset.cols) * playerSpriteAsset.cellHeight;
+    ctx.save();
+    if (typeof options.alpha === 'number') ctx.globalAlpha = options.alpha;
+    if (options.shadowColor) {
+        ctx.shadowBlur = options.shadowBlur ?? 14;
+        ctx.shadowColor = options.shadowColor;
+    }
+    ctx.drawImage(playerSpriteAsset.image, sx, sy, playerSpriteAsset.cellWidth, playerSpriteAsset.cellHeight, dx, dy, dw, dh);
+    ctx.restore();
+    return true;
+}
+
+ensurePlayerSpriteLoaded();
+
 const dragon = {
     x: 275,
     y: 700,
@@ -15,6 +68,14 @@ const dragon = {
     wingAnimation: 0, // Animação das asas
     tailAnimation: 0, // Animação da cauda
     breathAnimation: 0, // Animação da respiração
+    facing: 'front',
+    moveX: 0,
+    moveY: 0,
+    hurtAnimationTimer: 0,
+    spriteScale: 1.72,
+    visualRotation: 0,
+    trailHistory: [],
+    trailTick: 0,
     
     reset() {
         this.x = 275;
@@ -26,25 +87,57 @@ const dragon = {
         this.wingAnimation = 0;
         this.tailAnimation = 0;
         this.breathAnimation = 0;
+        this.facing = 'front';
+        this.moveX = 0;
+        this.moveY = 0;
+        this.hurtAnimationTimer = 0;
+        this.visualRotation = 0;
+        this.trailHistory = [];
+        this.trailTick = 0;
     },
     
     update() {
         const speed = this.speed + (upgrades.speed.level * 1.5);
+        this.moveX = 0;
+        this.moveY = 0;
         
         // Movimento horizontal
         if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
             this.x -= speed;
+            this.moveX -= 1;
+            this.facing = 'left';
         }
         if (keys['ArrowRight'] || keys['d'] || keys['D']) {
             this.x += speed;
+            this.moveX += 1;
+            this.facing = 'right';
         }
         
         // Movimento vertical
         if (keys['ArrowUp'] || keys['w'] || keys['W']) {
             this.y -= speed;
+            this.moveY -= 1;
         }
         if (keys['ArrowDown'] || keys['s'] || keys['S']) {
             this.y += speed;
+            this.moveY += 1;
+        }
+        if (this.moveX === 0 && Math.abs(this.moveY) > 0) {
+            this.facing = 'front';
+        }
+
+        // Inclinação visual suave sem alterar a hitbox.
+        const targetRotation = this.moveX * 0.11;
+        this.visualRotation += (targetRotation - this.visualRotation) * 0.18;
+        if (this.moveX === 0) this.visualRotation *= 0.90;
+
+        // Pequeno rastro visual do player. Usa poucas amostras para não pesar.
+        this.trailTick++;
+        if (this.trailTick % 3 === 0 && (this.moveX !== 0 || this.moveY !== 0)) {
+            this.trailHistory.unshift({ x: this.x, y: this.y, frame: this.getCurrentSpriteFrame() });
+            if (this.trailHistory.length > 3) this.trailHistory.length = 3;
+        } else if (this.moveX === 0 && this.moveY === 0 && this.trailHistory.length > 0 && this.trailTick % 4 === 0) {
+            this.trailHistory.pop();
         }
         
         // Limites da tela
@@ -61,6 +154,8 @@ const dragon = {
         this.tailAnimation += 0.1;
         this.breathAnimation += 0.08;
         
+        if (this.hurtAnimationTimer > 0) this.hurtAnimationTimer--;
+
         // Atualizar invulnerabilidade
         if (this.invulnerable) {
             this.invulnerableTimer--;
@@ -78,7 +173,7 @@ const dragon = {
         }
     },
     
-    draw() {
+    drawFallback() {
         const ctx = gameData.ctx;
         const centerX = this.x + this.width / 2;
         const centerY = this.y + this.height / 2;
@@ -152,7 +247,130 @@ const dragon = {
         ctx.restore();
     },
     
-    drawWings(ctx, centerX, centerY) {
+
+    getCurrentSpriteFrame() {
+        const recentShot = Date.now() - this.lastShot < 120;
+        if (this.hurtAnimationTimer > 0) return 14;
+        if (recentShot) {
+            if (gameStats.powerUpActive === 'rapid_fire' || upgrades.firepower.level >= 4) return 13;
+            return 12;
+        }
+        if (this.moveX < 0) {
+            return 4 + (Math.floor(this.wingAnimation * 4) % 4);
+        }
+        if (this.moveX > 0) {
+            return 8 + (Math.floor(this.wingAnimation * 4) % 4);
+        }
+        if (Math.abs(this.moveY) > 0 && this.facing === 'left') {
+            return 4 + (Math.floor(this.wingAnimation * 4) % 4);
+        }
+        if (Math.abs(this.moveY) > 0 && this.facing === 'right') {
+            return 8 + (Math.floor(this.wingAnimation * 4) % 4);
+        }
+        return Math.floor(this.wingAnimation * 4) % 4;
+    },
+
+
+draw() {
+    const ctx = gameData.ctx;
+    const centerX = this.x + this.width / 2;
+    const centerY = this.y + this.height / 2;
+    const quality = (typeof polishSystem !== 'undefined') ? polishSystem.effectiveQuality : 'medium';
+    const recentShot = Date.now() - this.lastShot < 100;
+    const frame = this.getCurrentSpriteFrame();
+    const bob = Math.sin(this.breathAnimation * 1.35) * 2.5;
+    const drawW = this.width * this.spriteScale;
+    const drawH = this.height * this.spriteScale;
+
+    let alpha = 1;
+    if (this.invulnerable && Math.floor(this.invulnerableTimer / 5) % 2 === 0) alpha = 0.48;
+
+    ctx.save();
+
+    // Afterimages discretos para transmitir velocidade. Desativados no modo baixo.
+    if (quality !== 'low' && playerSpriteAsset.loaded) {
+        for (let i = this.trailHistory.length - 1; i >= 0; i--) {
+            const trail = this.trailHistory[i];
+            const trailAlpha = 0.055 + (this.trailHistory.length - i) * 0.035;
+            const tx = trail.x + this.width / 2;
+            const ty = trail.y + this.height / 2;
+            ctx.save();
+            ctx.translate(tx, ty);
+            ctx.rotate(this.visualRotation * 0.65);
+            drawPlayerSpriteFrame(ctx, trail.frame, -drawW / 2, -drawH / 2 - 6, drawW, drawH, {
+                alpha: trailAlpha,
+                shadowColor: '#FF7A22',
+                shadowBlur: 4
+            });
+            ctx.restore();
+        }
+    }
+
+    // Aura de movimento/energia atrás do sprite.
+    if ((this.moveX !== 0 || this.moveY !== 0) && quality !== 'low') {
+        const aura = ctx.createRadialGradient(centerX, centerY + 14, 2, centerX, centerY + 14, 34);
+        aura.addColorStop(0, 'rgba(255,160,45,.18)');
+        aura.addColorStop(1, 'rgba(255,85,20,0)');
+        ctx.fillStyle = aura;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY + 14, 34, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Sprite inclina visualmente; a hitbox continua reta e do mesmo tamanho.
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(this.visualRotation);
+    const drawn = drawPlayerSpriteFrame(ctx, frame, -drawW / 2, -drawH / 2 - 6 + bob, drawW, drawH, {
+        alpha,
+        shadowColor: this.hurtAnimationTimer > 0 ? '#FFFFFF' : (recentShot ? '#FFD06B' : '#FF6B35'),
+        shadowBlur: this.hurtAnimationTimer > 0 ? 18 : (recentShot ? 15 : 10)
+    });
+    ctx.restore();
+
+    if (!drawn) this.drawFallback();
+
+    // Impacto de dano: anel curto e claro, sem mexer na gameplay.
+    if (this.hurtAnimationTimer > 0) {
+        const hurtPct = this.hurtAnimationTimer / 18;
+        ctx.strokeStyle = `rgba(255,255,255,${0.65 * hurtPct})`;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 28 + (1 - hurtPct) * 14, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    // Power-up fica visualmente ligado ao player, mas o cronômetro fica no HUD.
+    if (gameStats.powerUpActive) {
+        let powerUpStroke = 'rgba(0, 235, 255, 0.85)';
+        if (gameStats.powerUpActive === 'rapid_fire') powerUpStroke = 'rgba(255, 126, 35, 0.9)';
+        else if (gameStats.powerUpActive === 'double_damage') powerUpStroke = 'rgba(255, 60, 170, 0.9)';
+        else if (gameStats.powerUpActive === 'shield') powerUpStroke = 'rgba(55, 220, 255, 0.9)';
+        ctx.strokeStyle = powerUpStroke;
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.55 + Math.sin(this.wingAnimation * 1.5) * 0.12;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 37, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+    }
+
+    // Muzzle flash mais direcionado para a origem dos tiros.
+    if (recentShot) {
+        const flash = ctx.createRadialGradient(centerX, this.y - 2, 0, centerX, this.y - 2, 24);
+        flash.addColorStop(0, 'rgba(255,245,175,.9)');
+        flash.addColorStop(.35, 'rgba(255,154,45,.48)');
+        flash.addColorStop(1, 'rgba(255,90,20,0)');
+        ctx.fillStyle = flash;
+        ctx.beginPath();
+        ctx.arc(centerX, this.y - 2, 24, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.restore();
+},
+
+drawWings(ctx, centerX, centerY) {
         const wingFlap = Math.sin(this.wingAnimation) * 15;
         const wingExtend = Math.abs(Math.sin(this.wingAnimation)) * 10;
         
@@ -526,6 +744,7 @@ const dragon = {
         
         this.invulnerable = true;
         this.invulnerableTimer = 60;
+        this.hurtAnimationTimer = 18;
         
         if (gameStats.health <= 0) {
             gameStats.health = 0;

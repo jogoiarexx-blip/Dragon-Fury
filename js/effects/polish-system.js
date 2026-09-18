@@ -207,25 +207,96 @@ const polishSystem = {
         hudSystem.draw=(ctx)=>this.drawHud(ctx);
     },
     roundRect(ctx,x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();},
+
     drawHud(ctx){
-        const max=100+(upgrades.health.level*20), hp=Math.max(0,Math.min(1,gameStats.health/max)), stage=phaseSystem.getCurrentPhase?phaseSystem.getCurrentPhase():stages[gameData.currentStage];
+        const w=gameData.canvas.width,h=gameData.canvas.height;
+        const max=100+(upgrades.health.level*20);
+        const hp=Math.max(0,Math.min(1,gameStats.health/max));
+        const stage=phaseSystem.getCurrentPhase?phaseSystem.getCurrentPhase():stages[gameData.currentStage];
+        const mission=(typeof phaseSystem!=='undefined'&&phaseSystem.getPhaseProgress)?phaseSystem.getPhaseProgress():null;
+        const progress=mission?Math.max(0,Math.min(1,(mission.percentage||0)/100)):0;
+        const deckH=82;
+        const pad=12;
+        const rankResult=(typeof rankSystem!=='undefined'&&rankSystem.getCurrentRank)?rankSystem.getCurrentRank():null;
+        const rank=(rankResult&&rankResult.letter)||rankResult||'C';
+        const rankColors={C:'#9e7b58',B:'#c6d1e1',A:'#ffd15a',S:'#ff8847',SS:'#f46dff'};
+        const rankColor=rankColors[rank]||'#ffd15a';
+
         ctx.save();
-        // compact top deck
-        ctx.fillStyle='rgba(5,7,16,.72)';this.roundRect(ctx,12,12,576,72,12);ctx.fill();ctx.strokeStyle='rgba(255,173,49,.24)';ctx.stroke();
-        ctx.fillStyle='#9ba6bc';ctx.font='700 9px Arial';ctx.fillText('INTEGRIDADE',28,31);ctx.fillStyle='rgba(255,255,255,.12)';this.roundRect(ctx,28,39,214,14,7);ctx.fill();
-        const hg=ctx.createLinearGradient(28,0,242,0);hg.addColorStop(0,hp>.3?'#ffb62f':'#ff3e38');hg.addColorStop(1,hp>.5?'#ff6b25':'#b51624');ctx.fillStyle=hg;this.roundRect(ctx,28,39,214*hp,14,7);ctx.fill();
-        ctx.fillStyle='#fff';ctx.font='800 10px Arial';ctx.fillText(Math.ceil(gameStats.health)+' / '+max,28,68);
-        ctx.textAlign='right';ctx.fillStyle='#ffd258';ctx.font='900 18px Arial';ctx.fillText('🪙 '+gameStats.coins,568,37);ctx.fillStyle='#e7ebf4';ctx.font='800 12px Arial';ctx.fillText(String(gameStats.score).padStart(7,'0'),568,59);
-        ctx.textAlign='center';ctx.fillStyle='#7f8aa1';ctx.font='700 9px Arial';ctx.fillText('FASE '+gameData.currentStage,330,31);ctx.fillStyle='#fff';ctx.font='800 12px Arial';ctx.fillText((stage&&stage.name)||'',330,50);
-        const missionProg=(typeof phaseSystem!=='undefined'&&phaseSystem.getPhaseProgress)?phaseSystem.getPhaseProgress():null, prog=missionProg?Math.min(1,(missionProg.percentage||0)/100):0;ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(278,62,104,3);ctx.fillStyle='#ff9c28';ctx.fillRect(278,62,104*prog,3);
-        // rank pill
-        if(typeof rankSystem!=='undefined'){const rr=rankSystem.getCurrentRank?rankSystem.getCurrentRank():'C'; const rank=(rr&&rr.letter)||rr||'C';ctx.textAlign='left';ctx.fillStyle='rgba(5,7,16,.75)';this.roundRect(ctx,12,94,88,34,9);ctx.fill();ctx.fillStyle='#ffd34a';ctx.font='900 16px Arial';ctx.fillText('RANK '+rank,25,117);}
-        // active powerup
-        if(gameStats.powerUpActive){ctx.textAlign='right';ctx.fillStyle='rgba(5,7,16,.76)';this.roundRect(ctx,410,94,178,34,9);ctx.fill();ctx.fillStyle='#62f3ff';ctx.font='800 11px Arial';ctx.fillText('⚡ '+gameStats.powerUpActive.replace('_',' ').toUpperCase(),575,116);}
-        // boss bar
-        if(gameData.bossActive&&gameEntities.boss&&!this.bossIntro.active){const b=gameEntities.boss,bp=Math.max(0,b.health/b.maxHealth);ctx.textAlign='center';ctx.fillStyle='rgba(7,5,10,.88)';this.roundRect(ctx,75,142,450,54,10);ctx.fill();ctx.fillStyle='#ff6542';ctx.font='900 12px Arial';ctx.fillText((b.name||b.stageName||'BOSS').toUpperCase(),300,161);ctx.fillStyle='rgba(255,255,255,.12)';this.roundRect(ctx,98,171,404,9,5);ctx.fill();ctx.fillStyle='#e8352c';this.roundRect(ctx,98,171,404*bp,9,5);ctx.fill();}
-        // combo
-        if(gameData.comboCount>1){ctx.textAlign='center';ctx.fillStyle='#ffd45a';ctx.font='900 24px Arial';ctx.shadowBlur=10;ctx.shadowColor='#ff6a20';ctx.fillText('COMBO '+gameData.comboCount+'x',300,748);ctx.shadowBlur=0;}
+
+        // Painel superior único e compacto, alinhado ao novo menu principal.
+        ctx.fillStyle='rgba(5,7,16,.76)';
+        this.roundRect(ctx,pad,pad,w-pad*2,deckH,12);ctx.fill();
+        ctx.strokeStyle='rgba(255,166,43,.28)';ctx.lineWidth=1;ctx.stroke();
+
+        // VIDA / integridade - lado esquerdo.
+        const healthX=26,healthY=25,healthW=198,healthH=13;
+        ctx.textAlign='left';
+        ctx.fillStyle='#8995ab';ctx.font='700 8px Arial';ctx.fillText('INTEGRIDADE',healthX,healthY-4);
+        ctx.fillStyle='rgba(255,255,255,.11)';this.roundRect(ctx,healthX,healthY,healthW,healthH,6);ctx.fill();
+        const healthGrad=ctx.createLinearGradient(healthX,0,healthX+healthW,0);
+        if(hp>.55){healthGrad.addColorStop(0,'#ffd45b');healthGrad.addColorStop(1,'#ff762b');}
+        else if(hp>.28){healthGrad.addColorStop(0,'#ffb52d');healthGrad.addColorStop(1,'#ff4a29');}
+        else{healthGrad.addColorStop(0,'#ff5c45');healthGrad.addColorStop(1,'#b81628');}
+        ctx.fillStyle=healthGrad;this.roundRect(ctx,healthX,healthY,Math.max(2,healthW*hp),healthH,6);ctx.fill();
+        if(hp<=.25 && Math.floor(Date.now()/220)%2===0){ctx.strokeStyle='rgba(255,68,55,.7)';ctx.lineWidth=2;this.roundRect(ctx,healthX-2,healthY-2,healthW+4,healthH+4,7);ctx.stroke();}
+        ctx.fillStyle='#fff';ctx.font='800 10px Arial';ctx.fillText(Math.ceil(gameStats.health)+' / '+max,healthX,58);
+
+        // Chips de pontuação/moedas, sem ícones gigantes.
+        ctx.fillStyle='rgba(255,255,255,.055)';this.roundRect(ctx,healthX+70,46,72,22,7);ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,.055)';this.roundRect(ctx,healthX+148,46,76,22,7);ctx.fill();
+        ctx.fillStyle='#dce4f1';ctx.font='800 9px Arial';ctx.fillText('PTS '+String(gameStats.score).padStart(5,'0'),healthX+78,61);
+        ctx.fillStyle='#ffd15a';ctx.fillText('🪙 '+gameStats.coins,healthX+158,61);
+
+        // Rank central pequeno, não briga com a missão.
+        const rankX=w/2,rankY=43;
+        ctx.fillStyle='rgba(255,255,255,.05)';ctx.beginPath();ctx.arc(rankX,rankY,23,0,Math.PI*2);ctx.fill();
+        ctx.strokeStyle=rankColor;ctx.lineWidth=2;ctx.beginPath();ctx.arc(rankX,rankY,23,0,Math.PI*2);ctx.stroke();
+        ctx.textAlign='center';ctx.fillStyle=rankColor;ctx.font='900 18px Arial';ctx.fillText(rank,rankX,rankY+6);
+        ctx.fillStyle='#7f8aa1';ctx.font='700 7px Arial';ctx.fillText('RANK',rankX,rankY+31);
+
+        // Missão/fase - lado direito.
+        const missionW=230,missionX=w-pad-missionW,missionY=22;
+        ctx.textAlign='left';ctx.fillStyle='#8995ab';ctx.font='700 8px Arial';ctx.fillText('FASE '+gameData.currentStage,missionX,missionY);
+        ctx.fillStyle='#f2f5fa';ctx.font='800 11px Arial';
+        const phaseName=((stage&&stage.name)||'').toUpperCase();ctx.fillText(phaseName,missionX,missionY+16);
+        ctx.fillStyle='rgba(255,255,255,.10)';this.roundRect(ctx,missionX,missionY+25,missionW,8,4);ctx.fill();
+        ctx.fillStyle='#ff9828';this.roundRect(ctx,missionX,missionY+25,Math.max(2,missionW*progress),8,4);ctx.fill();
+        const label=(mission&&mission.label)?mission.label:'MISSÃO';
+        ctx.fillStyle='#ffd258';ctx.font='800 8px Arial';ctx.fillText(label.toUpperCase(),missionX,missionY+48);
+        if(mission&&mission.detail){ctx.textAlign='right';ctx.fillStyle='#8793a7';ctx.font='700 8px Arial';ctx.fillText(mission.detail,w-pad-2,missionY+48);}
+
+        // Power-up ativo: card curto no rodapé com barra de tempo real.
+        if(gameStats.powerUpActive){
+            const names={rapid_fire:'TIRO RÁPIDO',shield:'ESCUDO',double_damage:'DANO DUPLO',health:'VIDA+',bomb:'BOMBA'};
+            const secs=Math.max(0,Math.ceil((gameStats.powerUpTimer||0)/60));
+            const pct=Math.max(0,Math.min(1,(gameStats.powerUpTimer||0)/600));
+            const pw=188,px=(w-pw)/2,py=h-46;
+            ctx.fillStyle='rgba(5,7,16,.80)';this.roundRect(ctx,px,py,pw,30,9);ctx.fill();
+            ctx.strokeStyle='rgba(87,225,255,.34)';ctx.lineWidth=1;ctx.stroke();
+            ctx.textAlign='left';ctx.fillStyle='#dfe8f5';ctx.font='800 9px Arial';ctx.fillText(names[gameStats.powerUpActive]||gameStats.powerUpActive.toUpperCase(),px+12,py+13);
+            ctx.textAlign='right';ctx.fillStyle='#62f3ff';ctx.fillText(secs+'s',px+pw-12,py+13);
+            ctx.fillStyle='rgba(255,255,255,.10)';this.roundRect(ctx,px+12,py+20,pw-24,4,2);ctx.fill();
+            ctx.fillStyle='#62f3ff';this.roundRect(ctx,px+12,py+20,Math.max(2,(pw-24)*pct),4,2);ctx.fill();
+        }
+
+        // Boss: barra mais baixa e mais fina, sem ocupar o centro da ação.
+        if(gameData.bossActive&&gameEntities.boss&&!this.bossIntro.active){
+            const b=gameEntities.boss,bp=Math.max(0,Math.min(1,b.health/b.maxHealth));
+            const bx=72,by=104,bw=w-144;
+            ctx.fillStyle='rgba(7,5,10,.84)';this.roundRect(ctx,bx,by,bw,38,9);ctx.fill();
+            ctx.textAlign='center';ctx.fillStyle='#ff7655';ctx.font='900 9px Arial';ctx.fillText((b.name||b.stageName||'BOSS').toUpperCase(),w/2,by+13);
+            ctx.fillStyle='rgba(255,255,255,.10)';this.roundRect(ctx,bx+18,by+22,bw-36,7,4);ctx.fill();
+            ctx.fillStyle='#df392f';this.roundRect(ctx,bx+18,by+22,Math.max(2,(bw-36)*bp),7,4);ctx.fill();
+        }
+
+        // Combo: destaque mais compacto e fora da barra do power-up.
+        if(gameData.comboCount>1){
+            ctx.textAlign='center';ctx.font='900 18px Arial';ctx.fillStyle='#ffd45a';
+            ctx.shadowBlur=this.effectiveQuality==='low'?0:8;ctx.shadowColor='#ff6a20';
+            ctx.fillText(gameData.comboCount+'x COMBO',w/2,h-72);ctx.shadowBlur=0;
+        }
+
         ctx.restore();
     }
 };

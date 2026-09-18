@@ -1,6 +1,67 @@
 // ===== SISTEMA AVANÇADO DE POWER-UPS =====
 // Sistema completo com formas geométricas, bordas animadas, partículas e magnetismo
 
+
+const powerUpSpriteAtlas = {
+    src: 'assets/powerups/powerup-icons.webp',
+    image: null,
+    loaded: false,
+    loading: false,
+    error: false,
+    cols: 5,
+    rows: 1,
+    cellWidth: 0,
+    cellHeight: 0,
+    indexByType: {
+        health: 0,
+        rapid_fire: 1,
+        shield: 2,
+        bomb: 3,
+        double_damage: 4
+    }
+};
+
+function ensurePowerUpSpriteAtlasLoaded() {
+    if (powerUpSpriteAtlas.loaded || powerUpSpriteAtlas.loading) return powerUpSpriteAtlas;
+    powerUpSpriteAtlas.loading = true;
+    const img = new Image();
+    img.onload = () => {
+        powerUpSpriteAtlas.image = img;
+        powerUpSpriteAtlas.loaded = true;
+        powerUpSpriteAtlas.loading = false;
+        powerUpSpriteAtlas.error = false;
+        powerUpSpriteAtlas.cellWidth = img.width / powerUpSpriteAtlas.cols;
+        powerUpSpriteAtlas.cellHeight = img.height / powerUpSpriteAtlas.rows;
+    };
+    img.onerror = () => {
+        powerUpSpriteAtlas.error = true;
+        powerUpSpriteAtlas.loading = false;
+    };
+    img.src = powerUpSpriteAtlas.src;
+    powerUpSpriteAtlas.image = img;
+    return powerUpSpriteAtlas;
+}
+
+function drawPowerUpSpriteIcon(ctx, type, x, y, size, rotation = 0) {
+    ensurePowerUpSpriteAtlasLoaded();
+    if (!powerUpSpriteAtlas.loaded || !powerUpSpriteAtlas.image) return false;
+    const frame = powerUpSpriteAtlas.indexByType[type];
+    if (frame === undefined) return false;
+    const sx = frame * powerUpSpriteAtlas.cellWidth;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rotation);
+    ctx.drawImage(
+        powerUpSpriteAtlas.image,
+        sx, 0,
+        powerUpSpriteAtlas.cellWidth, powerUpSpriteAtlas.cellHeight,
+        -size / 2, -size / 2,
+        size, size
+    );
+    ctx.restore();
+    return true;
+}
+
 const powerUpEffects = {
     particles: [], // Partículas ao redor dos power-ups
     magneticEffects: [], // Efeitos de atração magnética
@@ -84,6 +145,7 @@ const powerUpEffects = {
         this.rotationPhase = 0;
         this.pulsePhase = 0;
         this.energyPhase = 0;
+        ensurePowerUpSpriteAtlasLoaded();
     },
     
     // Melhorar power-up com propriedades extras
@@ -408,10 +470,11 @@ const powerUpEffects = {
         ctx.stroke();
         
         // Ícone
-        if (this.config.useCustomIcons) {
+        const spriteDrawn = drawPowerUpSpriteIcon(ctx, powerup.type, centerX, centerY, baseRadius * 1.7, powerup.rotationAngle * 0.15);
+        if (!spriteDrawn && this.config.useCustomIcons) {
             this.drawCustomIcon(ctx, powerup.type, centerX, centerY, baseRadius * 0.6);
-        } else {
-            // Fallback para emoji
+        }
+        if (!spriteDrawn && !this.config.useCustomIcons) {
             const symbols = {
                 health: '❤️',
                 rapid_fire: '⚡',

@@ -1,5 +1,36 @@
 // ===== ENTIDADES DO JOGO =====
 
+
+const fallbackPowerUpSpriteAtlas = {
+    src: 'assets/powerups/powerup-icons.webp',
+    image: null,
+    loaded: false,
+    loading: false,
+    error: false,
+    cols: 5,
+    cellWidth: 0,
+    cellHeight: 0,
+    indexByType: { health: 0, rapid_fire: 1, shield: 2, bomb: 3, double_damage: 4 }
+};
+function ensureFallbackPowerUpSpriteAtlasLoaded() {
+    if (fallbackPowerUpSpriteAtlas.loaded || fallbackPowerUpSpriteAtlas.loading) return fallbackPowerUpSpriteAtlas;
+    fallbackPowerUpSpriteAtlas.loading = true;
+    const img = new Image();
+    img.onload = () => {
+        fallbackPowerUpSpriteAtlas.image = img;
+        fallbackPowerUpSpriteAtlas.loaded = true;
+        fallbackPowerUpSpriteAtlas.loading = false;
+        fallbackPowerUpSpriteAtlas.error = false;
+        fallbackPowerUpSpriteAtlas.cellWidth = img.width / fallbackPowerUpSpriteAtlas.cols;
+        fallbackPowerUpSpriteAtlas.cellHeight = img.height;
+    };
+    img.onerror = () => { fallbackPowerUpSpriteAtlas.error = true; fallbackPowerUpSpriteAtlas.loading = false; };
+    img.src = fallbackPowerUpSpriteAtlas.src;
+    fallbackPowerUpSpriteAtlas.image = img;
+    return fallbackPowerUpSpriteAtlas;
+}
+ensureFallbackPowerUpSpriteAtlasLoaded();
+
 const entities = {
     
     waveTimer: 0,

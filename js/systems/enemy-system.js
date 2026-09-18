@@ -57,6 +57,39 @@ const enemySpriteAssets = {
         rows: 4,
         cellWidth: 0,
         cellHeight: 0
+    },
+    kamikazeIgnition: {
+        src: 'assets/enemies/phase3/kamikaze-ignition.webp',
+        image: null,
+        loaded: false,
+        loading: false,
+        error: false,
+        cols: 4,
+        rows: 4,
+        cellWidth: 0,
+        cellHeight: 0
+    },
+    parasiteVoid: {
+        src: 'assets/enemies/phase4/parasite-void.webp',
+        image: null,
+        loaded: false,
+        loading: false,
+        error: false,
+        cols: 4,
+        rows: 4,
+        cellWidth: 0,
+        cellHeight: 0
+    },
+    summonerArcane: {
+        src: 'assets/enemies/phase5/summoner-arcane.webp',
+        image: null,
+        loaded: false,
+        loading: false,
+        error: false,
+        cols: 4,
+        rows: 4,
+        cellWidth: 0,
+        cellHeight: 0
     }
 };
 
@@ -108,6 +141,9 @@ ensureEnemySpriteLoaded('zigzagPhase1');
 ensureEnemySpriteLoaded('vanguardElite');
 ensureEnemySpriteLoaded('tankFortress');
 ensureEnemySpriteLoaded('sniperArcane');
+ensureEnemySpriteLoaded('kamikazeIgnition');
+ensureEnemySpriteLoaded('parasiteVoid');
+ensureEnemySpriteLoaded('summonerArcane');
 
 // Classe base melhorada para todos os inimigos
 class BaseEnemy {
@@ -832,6 +868,9 @@ class KamikazeEnemy extends BaseEnemy {
         this.chaseSpeed = 6;
         this.activated = false;
         this.explosionRadius = 80;
+        this.spriteAssetKey = 'kamikazeIgnition';
+        this.spriteScale = 1.45;
+        ensureEnemySpriteLoaded(this.spriteAssetKey);
     }
     
     update() {
@@ -900,78 +939,98 @@ class KamikazeEnemy extends BaseEnemy {
         localStorage.setItem('enemiesDefeated', enemiesDefeated);
     }
     
-    draw(ctx) {
-        const centerX = this.x + this.width / 2;
-        const centerY = this.y + this.height / 2;
-        const pulseSize = this.activated ? Math.sin(this.animationFrame * 0.3) * 6 : 0;
-        
-        ctx.save();
-        
-        // Onda de explosão iminente
-        if (this.activated) {
-            ctx.strokeStyle = `rgba(255, 69, 0, ${Math.sin(this.animationFrame * 0.2) * 0.5 + 0.5})`;
-            ctx.lineWidth = 3;
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = '#FF4500';
+
+getCurrentSpriteFrame() {
+    if (this.hitFlash > 0) return 13;
+    if (this.activated) {
+        const chargeFrames = [8, 9, 10, 11];
+        return chargeFrames[Math.floor(this.animationFrame / 4) % chargeFrames.length];
+    }
+    const flyFrames = [0, 1, 2, 3, 4, 5];
+    return flyFrames[Math.floor(this.animationFrame / 6) % flyFrames.length];
+}
+
+drawFallback(ctx) {
+    const centerX = this.x + this.width / 2;
+    const centerY = this.y + this.height / 2;
+    const pulseSize = this.activated ? Math.sin(this.animationFrame * 0.3) * 6 : 0;
+    ctx.save();
+    if (this.activated) {
+        ctx.strokeStyle = `rgba(255, 69, 0, ${Math.sin(this.animationFrame * 0.2) * 0.5 + 0.5})`;
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = '#FF4500';
+        ctx.beginPath();
+        drawPolygonPath(ctx, centerX, centerY, 25 + pulseSize, 8, -this.animationFrame * 0.05);
+        ctx.stroke();
+    }
+    if (this.hitFlash > 0) {
+        ctx.globalAlpha = 0.7;
+        ctx.shadowBlur = 25;
+        ctx.shadowColor = '#FFFFFF';
+    }
+    ctx.shadowBlur = 15 + Math.abs(pulseSize);
+    ctx.shadowColor = this.color;
+    const kamiGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 14 + pulseSize);
+    kamiGradient.addColorStop(0, '#FFE066');
+    kamiGradient.addColorStop(0.5, this.color);
+    kamiGradient.addColorStop(1, '#5A0000');
+    ctx.fillStyle = kamiGradient;
+    drawGemPath(ctx, centerX, centerY, 14 + pulseSize, 9 + pulseSize * 0.6, 6, this.animationFrame * 0.03);
+    ctx.fill();
+    ctx.fillStyle = '#FFD700';
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = '#FFD700';
+    fillPolygon(ctx, centerX, centerY, 7 + pulseSize * 0.5, 5, -Math.PI / 2);
+    if (this.activated) {
+        ctx.strokeStyle = '#FFFF00';
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#FFFF00';
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI * 2 / 6) * i + this.animationFrame * 0.1;
+            const length = 10 + pulseSize;
             ctx.beginPath();
-            // 🔧 NOVO: onda de choque em octógono facetado em vez de círculo
-            drawPolygonPath(ctx, centerX, centerY, 25 + pulseSize, 8, -this.animationFrame * 0.05);
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX + Math.cos(angle) * length, centerY + Math.sin(angle) * length);
             ctx.stroke();
         }
-        
-        // Flash ao tomar dano
-        if (this.hitFlash > 0) {
-            ctx.globalAlpha = 0.7;
-            ctx.shadowBlur = 25;
-            ctx.shadowColor = '#FFFFFF';
-        }
-        
-        // Corpo pulsante (🔧 NOVO: gema de 6 pontas em vez de círculo — reforça o visual de "bomba instável")
-        ctx.shadowBlur = 15 + Math.abs(pulseSize);
-        ctx.shadowColor = this.color;
-        const kamiGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 14 + pulseSize);
-        kamiGradient.addColorStop(0, '#FFE066');
-        kamiGradient.addColorStop(0.5, this.color);
-        kamiGradient.addColorStop(1, '#5A0000');
-        ctx.fillStyle = kamiGradient;
-        drawGemPath(ctx, centerX, centerY, 14 + pulseSize, 9 + pulseSize * 0.6, 6, this.animationFrame * 0.03);
-        ctx.fill();
-        
-        // Núcleo instável (🔧 NOVO: pentágono em vez de círculo)
-        ctx.fillStyle = '#FFD700';
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = '#FFD700';
-        fillPolygon(ctx, centerX, centerY, 7 + pulseSize * 0.5, 5, -Math.PI / 2);
-        
-        // Raios de energia
-        if (this.activated) {
-            ctx.strokeStyle = '#FFFF00';
-            ctx.lineWidth = 2;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#FFFF00';
-            for (let i = 0; i < 6; i++) {
-                const angle = (Math.PI * 2 / 6) * i + this.animationFrame * 0.1;
-                const length = 10 + pulseSize;
-                ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.lineTo(
-                    centerX + Math.cos(angle) * length,
-                    centerY + Math.sin(angle) * length
-                );
-                ctx.stroke();
-            }
-        }
-        
-        // Símbolo de perigo
-        ctx.fillStyle = '#000000';
-        ctx.font = 'bold 14px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('!', centerX, centerY);
-        
-        ctx.restore();
-        this.drawHealthBar(ctx);
     }
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('!', centerX, centerY);
+    ctx.restore();
+}
+
+draw(ctx) {
+    ensureEnemySpriteLoaded(this.spriteAssetKey);
+    const asset = enemySpriteAssets[this.spriteAssetKey];
+    const frame = this.getCurrentSpriteFrame();
+    const pulseSize = this.activated ? Math.sin(this.animationFrame * 0.3) * 6 : 0;
+    const drawW = this.width * this.spriteScale + Math.abs(pulseSize) * 0.2;
+    const drawH = this.height * this.spriteScale + Math.abs(pulseSize) * 0.2;
+    const drawX = this.x - (drawW - this.width) / 2;
+    const drawY = this.y - (drawH - this.height) / 2;
+    ctx.save();
+    if (this.activated) {
+        ctx.strokeStyle = `rgba(255, 120, 20, ${Math.sin(this.animationFrame * 0.2) * 0.5 + 0.5})`;
+        ctx.lineWidth = 2.5;
+        ctx.shadowBlur = 18;
+        ctx.shadowColor = '#FF6B00';
+        ctx.beginPath();
+        drawPolygonPath(ctx, this.x + this.width / 2, this.y + this.height / 2, 23 + pulseSize, 8, -this.animationFrame * 0.05);
+        ctx.stroke();
+    }
+    const drawn = drawSpriteFrame(ctx, asset, frame, drawX, drawY, drawW, drawH, {
+        shadowColor: this.hitFlash > 0 ? '#FFFFFF' : (this.activated ? '#FFB347' : '#FF5A1F'),
+        shadowBlur: this.hitFlash > 0 ? 18 : 14
+    });
+    ctx.restore();
+    if (!drawn) this.drawFallback(ctx);
+    this.drawHealthBar(ctx);
+}
 }
 
 // 6. INIMIGO PARASITA - SUGADOR DE ENERGIA
@@ -990,6 +1049,9 @@ class ParasiteEnemy extends BaseEnemy {
         this.drainRate = 60;
         this.drainTimer = 0;
         this.tentacles = [];
+        this.spriteAssetKey = 'parasiteVoid';
+        this.spriteScale = 1.35;
+        ensureEnemySpriteLoaded(this.spriteAssetKey);
         for (let i = 0; i < 6; i++) {
             this.tentacles.push({
                 angle: (Math.PI * 2 / 6) * i,
@@ -1042,79 +1104,98 @@ class ParasiteEnemy extends BaseEnemy {
         }
     }
     
-    draw(ctx) {
-        const centerX = this.x + this.width / 2;
-        const centerY = this.y + this.height / 2;
-        
-        ctx.save();
-        
-        // Flash ao tomar dano
-        if (this.hitFlash > 0) {
-            ctx.globalAlpha = 0.7;
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = '#FFFFFF';
-        }
-        
-        // Tentáculos ondulantes
-        this.tentacles.forEach((tentacle, i) => {
-            const wave = Math.sin(this.animationFrame * 0.15 + tentacle.phase) * 5;
-            const angle = tentacle.angle + wave * 0.1;
-            const length = tentacle.length + wave;
-            
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = 3;
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = this.color;
-            
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            const midX = centerX + Math.cos(angle) * (length / 2);
-            const midY = centerY + Math.sin(angle) * (length / 2);
-            const endX = centerX + Math.cos(angle) * length;
-            const endY = centerY + Math.sin(angle) * length;
-            
-            ctx.quadraticCurveTo(
-                midX + Math.sin(angle) * wave,
-                midY + Math.cos(angle) * wave,
-                endX, endY
-            );
-            ctx.stroke();
-            
-            // Ponta da tentáculo (🔧 NOVO: losango em vez de círculo)
-            ctx.fillStyle = '#7FFF00';
-            ctx.shadowBlur = 5;
-            ctx.shadowColor = '#7FFF00';
-            fillDiamond(ctx, endX, endY, 2.5, angle);
-        });
-        
-        // Corpo orgânico (🔧 NOVO: heptágono irregular em vez de círculo)
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = this.color;
-        fillPolygonGradient(ctx, centerX, centerY, 11, 7, '#B8FF6B', this.color, this.animationFrame * 0.02);
-        strokePolygon(ctx, centerX, centerY, 11, 7, 'rgba(0,0,0,0.35)', 1, this.animationFrame * 0.02);
-        
-        // Membrana pulsante (🔧 NOVO: hexágono)
-        ctx.fillStyle = 'rgba(127, 255, 0, 0.5)';
-        const pulse = Math.sin(this.animationFrame * 0.2) * 2;
-        fillPolygon(ctx, centerX, centerY, 8 + pulse, 6, -this.animationFrame * 0.03);
-        
-        // Núcleo (🔧 NOVO: losango)
-        ctx.fillStyle = '#FFD700';
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = '#FFD700';
-        fillDiamond(ctx, centerX, centerY, 4, this.animationFrame * 0.05);
-        
-        ctx.restore();
-        this.drawHealthBar(ctx);
+
+getCurrentSpriteFrame() {
+    if (this.hitFlash > 0) return 13;
+    if (this.attached) {
+        const drainFrames = [8, 9, 10, 11];
+        return drainFrames[Math.floor(this.animationFrame / 6) % drainFrames.length];
     }
+    const hoverFrames = [0, 1, 2, 3, 4, 5];
+    return hoverFrames[Math.floor(this.animationFrame / 7) % hoverFrames.length];
+}
+
+drawFallback(ctx) {
+    const centerX = this.x + this.width / 2;
+    const centerY = this.y + this.height / 2;
+    ctx.save();
+    if (this.hitFlash > 0) {
+        ctx.globalAlpha = 0.7;
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = '#FFFFFF';
+    }
+    this.tentacles.forEach((tentacle) => {
+        const wave = Math.sin(this.animationFrame * 0.15 + tentacle.phase) * 5;
+        const angle = tentacle.angle + wave * 0.1;
+        const length = tentacle.length + wave;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = this.color;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        const midX = centerX + Math.cos(angle) * (length / 2);
+        const midY = centerY + Math.sin(angle) * (length / 2);
+        const endX = centerX + Math.cos(angle) * length;
+        const endY = centerY + Math.sin(angle) * length;
+        ctx.quadraticCurveTo(midX + Math.sin(angle) * wave, midY + Math.cos(angle) * wave, endX, endY);
+        ctx.stroke();
+        ctx.fillStyle = '#7FFF00';
+        ctx.shadowBlur = 5;
+        ctx.shadowColor = '#7FFF00';
+        fillDiamond(ctx, endX, endY, 2.5, angle);
+    });
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = this.color;
+    fillPolygonGradient(ctx, centerX, centerY, 11, 7, '#B8FF6B', this.color, this.animationFrame * 0.02);
+    strokePolygon(ctx, centerX, centerY, 11, 7, 'rgba(0,0,0,0.35)', 1, this.animationFrame * 0.02);
+    ctx.fillStyle = 'rgba(127, 255, 0, 0.5)';
+    const pulse = Math.sin(this.animationFrame * 0.2) * 2;
+    fillPolygon(ctx, centerX, centerY, 8 + pulse, 6, -this.animationFrame * 0.03);
+    ctx.fillStyle = '#FFD700';
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = '#FFD700';
+    fillDiamond(ctx, centerX, centerY, 4, this.animationFrame * 0.05);
+    ctx.restore();
+}
+
+draw(ctx) {
+    ensureEnemySpriteLoaded(this.spriteAssetKey);
+    const asset = enemySpriteAssets[this.spriteAssetKey];
+    const frame = this.getCurrentSpriteFrame();
+    const bob = Math.sin(this.animationFrame * 0.12) * 2;
+    const drawW = this.width * this.spriteScale;
+    const drawH = this.height * this.spriteScale;
+    const drawX = this.x - (drawW - this.width) / 2;
+    const drawY = this.y - (drawH - this.height) / 2 + bob;
+    if (this.attached) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(60, 255, 220, 0.7)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        ctx.moveTo(this.x + this.width / 2, this.y + this.height / 2);
+        ctx.lineTo(dragon.x + dragon.width / 2, dragon.y + dragon.height / 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+    }
+    const drawn = drawSpriteFrame(ctx, asset, frame, drawX, drawY, drawW, drawH, {
+        shadowColor: this.hitFlash > 0 ? '#FFFFFF' : '#62F3FF',
+        shadowBlur: this.hitFlash > 0 ? 18 : 12
+    });
+    if (!drawn) this.drawFallback(ctx);
+    this.drawHealthBar(ctx);
+}
 }
 
 // 7. INIMIGO INVOCADOR - NECROMANTE
+
 class SummonerEnemy extends BaseEnemy {
     constructor(x, y) {
         super(x, y, {
-            width: 48,
-            height: 48,
+            width: 52,
+            height: 52,
             health: 90,
             speed: 1,
             color: '#8B008B',
@@ -1125,7 +1206,11 @@ class SummonerEnemy extends BaseEnemy {
         this.summonTimer = 60;
         this.maxSummons = 3;
         this.currentSummons = 0;
+        this.castAnimationTimer = 0;
         this.runes = [];
+        this.spriteAssetKey = 'summonerArcane';
+        this.spriteScale = 1.42;
+        ensureEnemySpriteLoaded(this.spriteAssetKey);
         for (let i = 0; i < 5; i++) {
             this.runes.push({
                 angle: (Math.PI * 2 / 5) * i,
@@ -1134,19 +1219,18 @@ class SummonerEnemy extends BaseEnemy {
             });
         }
     }
-    
+
     update() {
         super.update();
-        
+        if (this.castAnimationTimer > 0) this.castAnimationTimer--;
         this.summonTimer++;
         if (this.summonTimer >= this.summonRate && this.currentSummons < this.maxSummons) {
             this.summon();
             this.summonTimer = 0;
         }
     }
-    
+
     summon() {
-        // Invocar inimigo básico
         const side = Math.random() < 0.5 ? -1 : 1;
         const summonedEnemy = new BasicEnemy(
             this.x + side * 60,
@@ -1162,13 +1246,10 @@ class SummonerEnemy extends BaseEnemy {
             }
         );
         gameEntities.enemies.push(summonedEnemy);
-        
         this.currentSummons++;
-        
-        // Efeito de invocação
+        this.castAnimationTimer = 36;
         const centerX = this.x + this.width / 2;
         const centerY = this.y + this.height / 2;
-        
         for (let i = 0; i < 20; i++) {
             gameEntities.particles.push({
                 x: centerX + side * 60,
@@ -1181,42 +1262,46 @@ class SummonerEnemy extends BaseEnemy {
             });
         }
     }
-    
-    draw(ctx) {
+
+    getCurrentSpriteFrame() {
+        if (this.hitFlash > 0) return 13;
+        if (this.castAnimationTimer > 0) {
+            const castFrames = [8, 9, 10, 11];
+            return castFrames[Math.floor((36 - this.castAnimationTimer) / 3) % castFrames.length];
+        }
+        if (this.currentSummons < this.maxSummons && this.summonTimer > this.summonRate - 45) {
+            const prepFrames = [4, 5, 6, 7];
+            return prepFrames[Math.floor(this.animationFrame / 6) % prepFrames.length];
+        }
+        const idleFrames = [0, 1, 2, 3];
+        return idleFrames[Math.floor(this.animationFrame / 7) % idleFrames.length];
+    }
+
+    drawFallback(ctx) {
         const centerX = this.x + this.width / 2;
         const centerY = this.y + this.height / 2;
         const pulse = Math.sin(this.animationFrame * 0.05) * 3;
-        
         ctx.save();
-        
-        // Flash ao tomar dano
         if (this.hitFlash > 0) {
             ctx.globalAlpha = 0.7;
             ctx.shadowBlur = 25;
             ctx.shadowColor = '#FFFFFF';
         }
-        
-        // Círculo de invocação (🔧 NOVO: anel em dodecágono facetado em vez de círculo)
         ctx.strokeStyle = `rgba(139, 0, 139, ${Math.sin(this.animationFrame * 0.1) * 0.3 + 0.5})`;
         ctx.lineWidth = 2;
         ctx.shadowBlur = 15;
         ctx.shadowColor = '#8B008B';
         drawPolygonPath(ctx, centerX, centerY, 30 + pulse, 12, this.animationFrame * 0.015);
         ctx.stroke();
-        
-        // Runas orbitantes (🔧 NOVO: hexágonos em vez de quadrados simples)
-        this.runes.forEach((rune, i) => {
+        this.runes.forEach((rune) => {
             const angle = rune.angle + this.animationFrame * 0.02;
             const x = centerX + Math.cos(angle) * (rune.distance + pulse);
             const y = centerY + Math.sin(angle) * (rune.distance + pulse);
-            
             ctx.fillStyle = '#BA55D3';
             ctx.shadowBlur = 8;
             ctx.shadowColor = '#BA55D3';
             fillPolygon(ctx, x, y, 4.5, 6, angle);
         });
-        
-        // Corpo (pentagrama)
         ctx.fillStyle = this.color;
         ctx.shadowBlur = 15 + pulse;
         ctx.shadowColor = this.color;
@@ -1230,8 +1315,6 @@ class SummonerEnemy extends BaseEnemy {
         }
         ctx.closePath();
         ctx.fill();
-        
-        // Círculo central místico (🔧 NOVO: octógono cristalino em vez de círculo)
         const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 15);
         gradient.addColorStop(0, '#FFD700');
         gradient.addColorStop(0.5, '#8B008B');
@@ -1241,14 +1324,43 @@ class SummonerEnemy extends BaseEnemy {
         ctx.shadowColor = '#FFD700';
         fillPolygon(ctx, centerX, centerY, 15, 8, this.animationFrame * 0.02);
         strokePolygon(ctx, centerX, centerY, 15, 8, 'rgba(255,215,0,0.5)', 1.5, this.animationFrame * 0.02);
-        
-        // Olho místico (🔧 NOVO: hexágono)
         ctx.fillStyle = '#FF00FF';
         ctx.shadowBlur = 10;
         ctx.shadowColor = '#FF00FF';
         fillPolygon(ctx, centerX, centerY, 5, 6, -this.animationFrame * 0.04);
-        
         ctx.restore();
+    }
+
+    draw(ctx) {
+        ensureEnemySpriteLoaded(this.spriteAssetKey);
+        const asset = enemySpriteAssets[this.spriteAssetKey];
+        const frame = this.getCurrentSpriteFrame();
+        const centerX = this.x + this.width / 2;
+        const centerY = this.y + this.height / 2;
+        const pulse = Math.sin(this.animationFrame * 0.05) * 3;
+        const bob = Math.sin(this.animationFrame * 0.08) * 2;
+        const drawW = this.width * this.spriteScale;
+        const drawH = this.height * this.spriteScale;
+        const drawX = this.x - (drawW - this.width) / 2;
+        const drawY = this.y - (drawH - this.height) / 2 + bob;
+
+        ctx.save();
+        const preCast = this.currentSummons < this.maxSummons && this.summonTimer > this.summonRate - 45;
+        if (preCast || this.castAnimationTimer > 0) {
+            ctx.strokeStyle = this.castAnimationTimer > 0 ? 'rgba(182, 90, 255, 0.9)' : 'rgba(139, 0, 139, 0.65)';
+            ctx.lineWidth = 2.2;
+            ctx.shadowBlur = 16;
+            ctx.shadowColor = '#B75DFF';
+            ctx.beginPath();
+            drawPolygonPath(ctx, centerX, centerY, 30 + pulse, 12, this.animationFrame * 0.015);
+            ctx.stroke();
+        }
+        const drawn = drawSpriteFrame(ctx, asset, frame, drawX, drawY, drawW, drawH, {
+            shadowColor: this.hitFlash > 0 ? '#FFFFFF' : '#FF7A33',
+            shadowBlur: this.hitFlash > 0 ? 18 : 13
+        });
+        ctx.restore();
+        if (!drawn) this.drawFallback(ctx);
         this.drawHealthBar(ctx);
     }
 }

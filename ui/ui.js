@@ -68,7 +68,7 @@ const ui = {
     
     showAchievements() {
         document.getElementById('main-menu').style.display = 'none';
-        document.getElementById('achievements-panel').style.display = 'block';
+        document.getElementById('achievements-panel').style.display = 'flex';
         this.renderAchievements();
     },
     
@@ -77,7 +77,7 @@ const ui = {
         if (gameData.gameState === 'menu') {
             document.getElementById('main-menu').style.display = 'block';
         } else if (gameData.gameState === 'paused') {
-            document.getElementById('pause-menu').style.display = 'block';
+            document.getElementById('pause-menu').style.display = 'flex';
         }
     },
     
@@ -107,13 +107,13 @@ const ui = {
     
     showUpgrades() {
         document.getElementById('main-menu').style.display = 'none';
-        document.getElementById('upgrades-panel').style.display = 'block';
+        document.getElementById('upgrades-panel').style.display = 'flex';
         this.renderUpgrades();
     },
     
     showUpgradesFromPause() {
         document.getElementById('pause-menu').style.display = 'none';
-        document.getElementById('upgrades-panel').style.display = 'block';
+        document.getElementById('upgrades-panel').style.display = 'flex';
         this.renderUpgrades();
     },
     
@@ -121,7 +121,7 @@ const ui = {
     // completa), permitindo gastar as moedas ganhas antes de continuar.
     showUpgradesFromStageComplete() {
         document.getElementById('stage-complete').style.display = 'none';
-        document.getElementById('upgrades-panel').style.display = 'block';
+        document.getElementById('upgrades-panel').style.display = 'flex';
         this.renderUpgrades();
     },
     
@@ -130,10 +130,10 @@ const ui = {
         if (gameData.gameState === 'menu') {
             document.getElementById('main-menu').style.display = 'block';
         } else if (gameData.gameState === 'paused') {
-            document.getElementById('pause-menu').style.display = 'block';
+            document.getElementById('pause-menu').style.display = 'flex';
         } else if (gameData.gameState === 'stage_complete') {
             // Voltar para o seletor de fase (pontuação/rank já calculados)
-            document.getElementById('stage-complete').style.display = 'block';
+            document.getElementById('stage-complete').style.display = 'flex';
         }
     },
     
@@ -174,7 +174,7 @@ const ui = {
         const mainMenu = document.getElementById('main-menu');
         const panel = document.getElementById('instructions-panel');
         if (mainMenu) mainMenu.style.display = 'none';
-        if (panel) panel.style.display = 'block';
+        if (panel) panel.style.display = 'flex';
     },
 
     closeInstructions() {
@@ -204,7 +204,7 @@ const ui = {
             }
         }
         
-        document.getElementById('game-over').style.display = 'block';
+        document.getElementById('game-over').style.display = 'flex';
     },
     
     hideGameOver() {
@@ -213,7 +213,7 @@ const ui = {
     },
     
     showPauseMenu() {
-        document.getElementById('pause-menu').style.display = 'block';
+        document.getElementById('pause-menu').style.display = 'flex';
     },
     
     hidePauseMenu() {
@@ -334,11 +334,11 @@ const ui = {
         const nextBtn = document.getElementById('stage-complete-next-btn');
         if (nextBtn) {
             const isLastPhase = gameData.currentStage >= phaseSystem.maxPhases;
-            nextBtn.textContent = isLastPhase ? '🏆 Ver Resultado Final' : '▶️ Próxima Fase';
+            nextBtn.innerHTML = isLastPhase ? '<span class="btn-icon">🏆</span><span>RESULTADO FINAL<small>Ver encerramento da campanha</small></span><span class="btn-arrow">›</span>' : '<span class="btn-icon">▶</span><span>PRÓXIMA FASE<small>Continuar campanha</small></span><span class="btn-arrow">›</span>';
         }
         
         const stageCompleteDiv = document.getElementById('stage-complete');
-        stageCompleteDiv.style.display = 'block';
+        stageCompleteDiv.style.display = 'flex';
     },
     
     hideStageComplete() {
@@ -359,7 +359,7 @@ const ui = {
             }
         }
         
-        document.getElementById('game-complete').style.display = 'block';
+        document.getElementById('game-complete').style.display = 'flex';
     },
     
     hideGameComplete() {
