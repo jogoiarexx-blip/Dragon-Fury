@@ -30,7 +30,7 @@ const phaseSystem = {
                 type: 'AncientDragonBoss',
                 spawnCondition: 'kills' // Aparece após kills objetivo
             },
-            assets: ['assets/player/fire-dragon-player.webp', 'assets/powerups/powerup-icons.webp', 'assets/bosses/ancient-dragon-boss.webp', 'assets/enemies/phase1/basic-wyvern.webp', 'assets/enemies/phase1/zigzag-serpent.webp', 'assets/enemies/phase1/vanguard-elite.webp'],
+            assets: ['assets/player/fire-dragon-player.webp', 'assets/projectiles/player-fireballs.webp', 'assets/collectibles/dragon-coins.webp', 'assets/powerups/powerup-icons.webp', 'assets/bosses/ancient-dragon-boss.webp', 'assets/enemies/phase1/basic-wyvern.webp', 'assets/enemies/phase1/zigzag-serpent.webp', 'assets/enemies/phase1/vanguard-elite.webp'],
             
             // Música e efeitos
             ambience: {
@@ -62,7 +62,7 @@ const phaseSystem = {
                 type: 'AncientDragonBoss',
                 spawnCondition: 'kills'
             },
-            assets: ['assets/player/fire-dragon-player.webp', 'assets/powerups/powerup-icons.webp', 'assets/bosses/ancient-dragon-boss.webp', 'assets/enemies/phase1/basic-wyvern.webp', 'assets/enemies/phase1/zigzag-serpent.webp', 'assets/enemies/phase2/tank-fortress.webp', 'assets/enemies/phase2/sniper-arcane.webp'],
+            assets: ['assets/player/fire-dragon-player.webp', 'assets/projectiles/player-fireballs.webp', 'assets/collectibles/dragon-coins.webp', 'assets/powerups/powerup-icons.webp', 'assets/bosses/ancient-dragon-boss.webp', 'assets/enemies/phase1/basic-wyvern.webp', 'assets/enemies/phase1/zigzag-serpent.webp', 'assets/enemies/phase2/tank-fortress.webp', 'assets/enemies/phase2/sniper-arcane.webp'],
             
             ambience: {
                 starDensity: 80,
@@ -94,7 +94,7 @@ const phaseSystem = {
                 type: 'SegmentedSerpentBoss',
                 spawnCondition: 'kills'
             },
-            assets: ['assets/player/fire-dragon-player.webp', 'assets/powerups/powerup-icons.webp', 'assets/enemies/phase1/basic-wyvern.webp', 'assets/enemies/phase1/zigzag-serpent.webp', 'assets/enemies/phase2/tank-fortress.webp', 'assets/enemies/phase2/sniper-arcane.webp', 'assets/enemies/phase3/kamikaze-ignition.webp'],
+            assets: ['assets/player/fire-dragon-player.webp', 'assets/projectiles/player-fireballs.webp', 'assets/collectibles/dragon-coins.webp', 'assets/powerups/powerup-icons.webp', 'assets/enemies/phase1/basic-wyvern.webp', 'assets/enemies/phase1/zigzag-serpent.webp', 'assets/enemies/phase2/tank-fortress.webp', 'assets/enemies/phase2/sniper-arcane.webp', 'assets/enemies/phase3/kamikaze-ignition.webp'],
             
             ambience: {
                 starDensity: 60,
@@ -126,7 +126,7 @@ const phaseSystem = {
                 type: 'SegmentedSerpentBoss',
                 spawnCondition: 'kills'
             },
-            assets: ['assets/player/fire-dragon-player.webp', 'assets/powerups/powerup-icons.webp', 'assets/enemies/phase1/zigzag-serpent.webp', 'assets/enemies/phase2/tank-fortress.webp', 'assets/enemies/phase2/sniper-arcane.webp', 'assets/enemies/phase3/kamikaze-ignition.webp', 'assets/enemies/phase4/parasite-void.webp'],
+            assets: ['assets/player/fire-dragon-player.webp', 'assets/projectiles/player-fireballs.webp', 'assets/collectibles/dragon-coins.webp', 'assets/powerups/powerup-icons.webp', 'assets/enemies/phase1/zigzag-serpent.webp', 'assets/enemies/phase2/tank-fortress.webp', 'assets/enemies/phase2/sniper-arcane.webp', 'assets/enemies/phase3/kamikaze-ignition.webp', 'assets/enemies/phase4/parasite-void.webp'],
             
             ambience: {
                 starDensity: 40,
@@ -158,7 +158,7 @@ const phaseSystem = {
                 type: 'ChaosGeometryBoss',
                 spawnCondition: 'kills'
             },
-            assets: ['assets/player/fire-dragon-player.webp', 'assets/powerups/powerup-icons.webp', 'assets/enemies/phase2/tank-fortress.webp', 'assets/enemies/phase2/sniper-arcane.webp', 'assets/enemies/phase3/kamikaze-ignition.webp', 'assets/enemies/phase4/parasite-void.webp', 'assets/enemies/phase5/summoner-arcane.webp'],
+            assets: ['assets/player/fire-dragon-player.webp', 'assets/projectiles/player-fireballs.webp', 'assets/collectibles/dragon-coins.webp', 'assets/powerups/powerup-icons.webp', 'assets/enemies/phase2/tank-fortress.webp', 'assets/enemies/phase2/sniper-arcane.webp', 'assets/enemies/phase3/kamikaze-ignition.webp', 'assets/enemies/phase4/parasite-void.webp', 'assets/enemies/phase5/summoner-arcane.webp'],
             
             ambience: {
                 starDensity: 120,

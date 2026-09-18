@@ -50,6 +50,7 @@ const coinEffects = {
             coin.scale3D = 1;
             coin.lastX = coin.x;
             coin.lastY = coin.y;
+            if (coin.animationOffset === undefined) coin.animationOffset = Math.floor(Math.random() * 8);
         }
     },
     
@@ -162,9 +163,12 @@ const coinEffects = {
     drawCoin(ctx, coin) {
         this.enhanceCoin(coin);
         const quality = (typeof polishSystem !== 'undefined') ? polishSystem.effectiveQuality : 'medium';
-        if (quality === 'low') {
+        const centerX = coin.x + coin.width / 2;
+        const centerY = coin.y + coin.height / 2;
+        const spriteAvailable = ensureCoinSpriteAtlasLoaded().loaded;
+        if (quality === 'low' || !spriteAvailable) {
             ctx.save();
-            ctx.translate(coin.x + coin.width / 2, coin.y + coin.height / 2);
+            ctx.translate(centerX, centerY);
             ctx.scale(Math.max(0.35, coin.scale3D), 1);
             ctx.fillStyle = '#FFD700';
             fillPolygon(ctx, 0, 0, coin.width / 2, 8, coin.rotation3D);
@@ -175,60 +179,33 @@ const coinEffects = {
             ctx.restore();
             return;
         }
-        
+
         ctx.save();
-        ctx.translate(coin.x + coin.width / 2, coin.y + coin.height / 2);
-        
-        // Calcular brilho pulsante
-        const glowIntensity = this.config.glowMinIntensity + 
-            (Math.sin(this.glowPhase) * 0.5 + 0.5) * 
+        ctx.translate(centerX, centerY);
+        const glowIntensity = this.config.glowMinIntensity +
+            (Math.sin(this.glowPhase) * 0.5 + 0.5) *
             (this.config.glowMaxIntensity - this.config.glowMinIntensity);
-        
-        // Camada de brilho externo (aura)
-        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, coin.width);
-        gradient.addColorStop(0, 'rgba(255, 223, 0, 0.4)');
-        gradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.2)');
-        gradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
-        
-        ctx.fillStyle = gradient;
-        ctx.fillRect(-coin.width, -coin.height, coin.width * 2, coin.height * 2);
-        
-        // Sombra 3D
-        ctx.shadowBlur = glowIntensity;
-        ctx.shadowColor = '#FFD700';
-        ctx.shadowOffsetY = 3 * Math.sin(coin.rotation3D);
-        
-        // Desenhar moeda como octógono facetado 3D (🔧 MELHORADO: era uma elipse lisa, agora tem facetas)
-        ctx.scale(coin.scale3D, 1);
-        
-        // Gradiente dourado metálico
-        const coinGradient = ctx.createLinearGradient(-coin.width/2, -coin.height/2, 
-                                                       coin.width/2, coin.height/2);
-        coinGradient.addColorStop(0, '#FFE55C');
-        coinGradient.addColorStop(0.3, '#FFD700');
-        coinGradient.addColorStop(0.5, '#FFA500');
-        coinGradient.addColorStop(0.7, '#FFD700');
-        coinGradient.addColorStop(1, '#FFE55C');
-        
-        // Corpo da moeda (octógono em vez de elipse)
-        ctx.fillStyle = coinGradient;
-        fillPolygon(ctx, 0, 0, coin.width / 2, 8, coin.rotation3D);
-        
-        // Borda interna brilhante (🔧 NOVO: também facetada, acompanhando o corpo)
-        ctx.strokeStyle = '#FFEC8B';
-        ctx.lineWidth = 2;
-        drawPolygonPath(ctx, 0, 0, coin.width / 2 - 2, 8, coin.rotation3D);
-        ctx.stroke();
-        
-        // Símbolo no centro (sempre visível)
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = '#8B7500';
-        ctx.font = 'bold ' + (coin.width * 0.6) + 'px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.scale(1/coin.scale3D, 1); // Compensar escala para o texto ficar legível
-        ctx.fillText('$', 0, 1);
-        
+        const aura = ctx.createRadialGradient(0, 0, 0, 0, 0, coin.width * 1.4);
+        aura.addColorStop(0, 'rgba(255, 210, 60, 0.32)');
+        aura.addColorStop(0.45, 'rgba(255, 160, 0, 0.16)');
+        aura.addColorStop(1, 'rgba(255, 140, 0, 0)');
+        ctx.fillStyle = aura;
+        ctx.fillRect(-coin.width * 1.4, -coin.height * 1.4, coin.width * 2.8, coin.height * 2.8);
+
+        const spinFrames = 12;
+        const frame = ((Math.floor((coin.rotation3D / (Math.PI * 2)) * spinFrames) + (coin.animationOffset || 0)) % spinFrames + spinFrames) % spinFrames;
+        const pulseFrame = 12 + (Math.floor((this.glowPhase * 6)) % 4);
+        const drawW = coin.width * 2.1;
+        const drawH = coin.height * 2.1;
+        const drawn = drawCoinSpriteFrame(ctx, frame, -drawW / 2, -drawH / 2, drawW, drawH, 1);
+        if (drawn) {
+            ctx.globalCompositeOperation = 'screen';
+            drawCoinSpriteFrame(ctx, pulseFrame, -drawW / 2, -drawH / 2, drawW, drawH, 0.35 + Math.sin(this.glowPhase) * 0.08);
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.shadowBlur = glowIntensity;
+            ctx.shadowColor = '#FFB300';
+            drawCoinSpriteFrame(ctx, frame, -drawW / 2, -drawH / 2, drawW, drawH, 0.12);
+        }
         ctx.restore();
     },
     

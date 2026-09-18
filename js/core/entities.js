@@ -1,6 +1,52 @@
 // ===== ENTIDADES DO JOGO =====
 
 
+const projectileSpriteAtlas = {
+    src: 'assets/projectiles/player-fireballs.webp',
+    image: null,
+    loaded: false,
+    loading: false,
+    error: false,
+    cols: 4,
+    rows: 4,
+    cellWidth: 0,
+    cellHeight: 0
+};
+function ensureProjectileSpriteAtlasLoaded() {
+    if (projectileSpriteAtlas.loaded || projectileSpriteAtlas.loading) return projectileSpriteAtlas;
+    projectileSpriteAtlas.loading = true;
+    const img = new Image();
+    img.onload = () => {
+        projectileSpriteAtlas.image = img;
+        projectileSpriteAtlas.loaded = true;
+        projectileSpriteAtlas.loading = false;
+        projectileSpriteAtlas.error = false;
+        projectileSpriteAtlas.cellWidth = img.width / projectileSpriteAtlas.cols;
+        projectileSpriteAtlas.cellHeight = img.height / projectileSpriteAtlas.rows;
+    };
+    img.onerror = () => { projectileSpriteAtlas.error = true; projectileSpriteAtlas.loading = false; };
+    img.src = projectileSpriteAtlas.src;
+    projectileSpriteAtlas.image = img;
+    return projectileSpriteAtlas;
+}
+function drawProjectileSpriteFrame(ctx, frameIndex, x, y, w, h, rotation = 0, alpha = 1) {
+    ensureProjectileSpriteAtlasLoaded();
+    if (!projectileSpriteAtlas.loaded || !projectileSpriteAtlas.image) return false;
+    const totalFrames = projectileSpriteAtlas.cols * projectileSpriteAtlas.rows;
+    const frame = Math.max(0, Math.min(totalFrames - 1, frameIndex | 0));
+    const sx = (frame % projectileSpriteAtlas.cols) * projectileSpriteAtlas.cellWidth;
+    const sy = Math.floor(frame / projectileSpriteAtlas.cols) * projectileSpriteAtlas.cellHeight;
+    ctx.save();
+    ctx.translate(x + w / 2, y + h / 2);
+    ctx.rotate(rotation);
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(projectileSpriteAtlas.image, sx, sy, projectileSpriteAtlas.cellWidth, projectileSpriteAtlas.cellHeight, -w / 2, -h / 2, w, h);
+    ctx.restore();
+    return true;
+}
+ensureProjectileSpriteAtlasLoaded();
+
+
 const fallbackPowerUpSpriteAtlas = {
     src: 'assets/powerups/powerup-icons.webp',
     image: null,
@@ -489,6 +535,8 @@ const entities = {
         for (let index = gameEntities.fireballs.length - 1; index >= 0; index--) {
             const fireball = gameEntities.fireballs[index];
             
+            if (fireball.animTick === undefined) fireball.animTick = 0;
+            fireball.animTick++;
             if (fireball.type === 'player') {
                 fireball.y -= fireball.speed;
                 if (fireball.vx) fireball.x += fireball.vx;
@@ -962,43 +1010,53 @@ const entities = {
     
     drawFireballs() {
         const ctx = gameData.ctx;
+        const projAssetLoaded = ensureProjectileSpriteAtlasLoaded().loaded;
         gameEntities.fireballs.forEach(fireball => {
             const isPlayerFireball = fireball.type === 'player';
             let color = isPlayerFireball ? config.colors.fireball : '#8B008B';
-            
-            // Efeito especial se double damage ativo
             if (isPlayerFireball && gameStats.powerUpActive === 'double_damage') {
-                color = '#FF1493'; // Rosa choque
+                color = '#FF1493';
                 ctx.shadowBlur = 30;
             } else {
                 ctx.shadowBlur = 20;
             }
-            
+
+            if (isPlayerFireball && projAssetLoaded) {
+                const travelFrames = 8;
+                const frame = Math.floor((fireball.animTick || 0) / 2) % travelFrames;
+                const drawW = fireball.width * 2.4;
+                const drawH = fireball.height * 2.8;
+                const drawX = fireball.x - (drawW - fireball.width) / 2;
+                const drawY = fireball.y - (drawH - fireball.height) / 2;
+                const rotation = -Math.PI / 2;
+                ctx.save();
+                if (gameStats.powerUpActive === 'double_damage') {
+                    ctx.globalCompositeOperation = 'screen';
+                    drawProjectileSpriteFrame(ctx, frame, drawX, drawY, drawW * 1.06, drawH * 1.06, rotation, 0.42);
+                    ctx.globalCompositeOperation = 'source-over';
+                }
+                drawProjectileSpriteFrame(ctx, frame, drawX, drawY, drawW, drawH, rotation, 1);
+                ctx.restore();
+                return;
+            }
+
             ctx.fillStyle = color;
             ctx.shadowColor = color;
             ctx.beginPath();
-            ctx.arc(fireball.x + fireball.width/2, fireball.y + fireball.height/2, 
-                   fireball.width/2, 0, Math.PI * 2);
+            ctx.arc(fireball.x + fireball.width/2, fireball.y + fireball.height/2, fireball.width/2, 0, Math.PI * 2);
             ctx.fill();
-            
-            // Efeito extra de double damage - anel externo
             if (isPlayerFireball && gameStats.powerUpActive === 'double_damage') {
                 ctx.strokeStyle = '#FFD700';
                 ctx.lineWidth = 2;
                 ctx.globalAlpha = 0.7;
                 ctx.beginPath();
-                ctx.arc(fireball.x + fireball.width/2, fireball.y + fireball.height/2, 
-                       fireball.width/2 + 3, 0, Math.PI * 2);
+                ctx.arc(fireball.x + fireball.width/2, fireball.y + fireball.height/2, fireball.width/2 + 3, 0, Math.PI * 2);
                 ctx.stroke();
                 ctx.globalAlpha = 1;
             }
-            
-            // Rastro
             ctx.globalAlpha = 0.5;
             ctx.beginPath();
-            ctx.arc(fireball.x + fireball.width/2, 
-                   fireball.y + fireball.height/2 + (fireball.type === 'player' ? 5 : -5), 
-                   fireball.width/3, 0, Math.PI * 2);
+            ctx.arc(fireball.x + fireball.width/2, fireball.y + fireball.height/2 + (fireball.type === 'player' ? 5 : -5), fireball.width/3, 0, Math.PI * 2);
             ctx.fill();
             ctx.globalAlpha = 1;
         });

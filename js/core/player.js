@@ -150,7 +150,9 @@ const dragon = {
         }
         
         // Atualizar animações
-        this.wingAnimation += 0.15;
+        // Animação das asas mais natural: lenta no hover e levemente mais rápida em movimento
+        const isMoving = this.moveX !== 0 || this.moveY !== 0;
+        this.wingAnimation += isMoving ? 0.075 : 0.05;
         this.tailAnimation += 0.1;
         this.breathAnimation += 0.08;
         
@@ -725,7 +727,8 @@ drawWings(ctx, centerX, centerY) {
                 height: fireballSize,
                 speed: fireballSpeed,
                 damage: damage,
-                type: 'player'
+                type: 'player',
+                animTick: i * 2
             });
         }
     },
